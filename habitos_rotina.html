@@ -1,0 +1,1727 @@
+﻿<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Rotina Neural de Estudos · FMM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07121a;--card:#0d2232;--card2:#13303f;
+  --txt:#eef6fa;--mut:#7fb3c8;--line:#ffffff22;
+  --teal:#3de6c8;--blue:#5ab4ff;--lime:#b2eb5b;
+  --amber:#ffcc55;--red:#ff6b6b;--violet:#b48bff;
+  --base:16px;--r:18px;
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{
+  margin:0;min-height:100vh;
+  background:var(--bg);
+  background-image:
+    radial-gradient(ellipse 60% 40% at 0% 0%,#3de6c815,transparent),
+    radial-gradient(ellipse 50% 35% at 100% 80%,#5ab4ff10,transparent);
+  color:var(--txt);
+  font:var(--base)/1.6 'DM Sans',sans-serif;
+}
+body.large{--base:18px}
+body.xlarge{--base:20px}
+body.contrast{--bg:#000;--card:#111;--card2:#1a1a1a;--txt:#fff;--mut:#ddd;--line:#ffffff44;--teal:#00ffe0;--lime:#ccff00;background:#000}
+body.reading{--bg:#faf5e9;--card:#fffdf5;--card2:#f5ebcf;--txt:#1a1208;--mut:#4a3a20;--line:#c8a860;background:#faf5e9}
+body.reduce *{animation:none!important;transition:none!important}
+
+.app{max-width:720px;margin:auto;padding:0 16px calc(80px + var(--safe-bottom)) 16px}
+
+/* ===== TOP BAR ===== */
+.top{
+  position:sticky;top:0;z-index:100;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 0;gap:8px;
+  background:linear-gradient(to bottom,var(--bg) 60%,transparent);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+}
+.brand{font-family:'Syne',sans-serif;font-weight:900;font-size:.88rem;letter-spacing:.04em;color:var(--teal)}
+.top-actions{display:flex;gap:8px}
+
+/* ===== PROGRESS ===== */
+.prog-wrap{display:none;margin:0 0 20px}
+.prog-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.prog-label{font-size:.78rem;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.06em}
+.xp-badge{background:linear-gradient(135deg,var(--teal),var(--blue));color:#04151e;font-weight:900;font-size:.78rem;padding:3px 10px;border-radius:999px}
+.prog-bar{height:8px;background:#ffffff12;border-radius:99px;overflow:hidden;margin-bottom:10px}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--teal),var(--blue),var(--violet));border-radius:99px;transition:width .4s ease;width:0}
+.prog-dots{display:flex;gap:5px;flex-wrap:wrap}
+.prog-dot{height:6px;flex:1;background:#ffffff15;border-radius:99px;transition:.3s}
+.prog-dot.done{background:var(--lime)}
+.prog-dot.active{background:var(--teal)}
+
+/* ===== BUTTONS ===== */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  border:1.5px solid var(--line);background:var(--card2);color:var(--txt);
+  border-radius:14px;padding:13px 18px;
+  font:700 .92rem/1 'DM Sans',sans-serif;
+  cursor:pointer;text-decoration:none;
+  transition:transform .15s,border-color .15s,box-shadow .15s;
+  min-height:48px;
+  -webkit-appearance:none;
+}
+.btn:active{transform:scale(.97)}
+.btn:hover{border-color:var(--teal)}
+.btn.primary{background:linear-gradient(135deg,var(--teal),var(--blue));color:#04151e;border:0;font-weight:900}
+.btn.good{background:linear-gradient(135deg,var(--lime),var(--teal));color:#0a1f0a;border:0;font-weight:900}
+.btn.warn{background:linear-gradient(135deg,var(--amber),#ff9b3b);color:#1f1000;border:0;font-weight:900}
+.btn.danger{background:linear-gradient(135deg,var(--red),#ff9b3b);color:#fff;border:0}
+.btn.youtube{background:linear-gradient(135deg,#ff0000,#cc0000);color:#fff;border:0;font-weight:900;font-size:1rem;padding:16px 24px;border-radius:16px;width:100%;margin:12px 0}
+.btn.youtube svg{width:24px;height:24px;fill:currentColor}
+.btn:disabled{opacity:.4;pointer-events:none}
+.btn-sm{padding:9px 14px;font-size:.82rem;min-height:38px;border-radius:10px}
+.btn-icon{width:46px;height:46px;padding:0;border-radius:50%;font-size:1.1rem}
+.btn-full{width:100%}
+
+/* ===== SCREENS ===== */
+.screen{display:none}
+.screen.active{display:block;animation:rise .3s ease}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}}
+
+/* ===== TYPOGRAPHY ===== */
+h1,h2,h3{font-family:'Syne',sans-serif;margin:0 0 10px;line-height:1.1}
+h1{font-size:clamp(2rem,9vw,4rem);background:linear-gradient(135deg,#fff,var(--teal) 50%,var(--amber));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+h2{font-size:clamp(1.4rem,5vw,2.2rem)}
+h3{font-size:1.05rem}
+p,.sub{color:var(--mut);line-height:1.65;margin:0 0 12px;text-align:justify}
+.badge{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--teal)44;background:#3de6c810;border-radius:999px;padding:5px 14px;color:var(--teal);font-weight:800;text-transform:uppercase;font-size:.73rem;letter-spacing:.1em;margin-bottom:14px}
+
+/* ===== CARDS ===== */
+.card{background:linear-gradient(160deg,#ffffff0e,#ffffff06);border:1px solid var(--line);border-radius:var(--r);padding:20px;margin:14px 0}
+.info{border:1px solid var(--line);border-radius:14px;padding:14px;background:#ffffff08;margin:8px 0}
+.info-teal{border-color:var(--teal)55;background:#3de6c810}
+.info-blue{border-color:var(--blue)55;background:#5ab4ff10}
+.info-lime{border-color:var(--lime)55;background:#b2eb5b10}
+.info-amber{border-color:var(--amber)55;background:#ffcc5510}
+.info-violet{border-color:var(--violet)55;background:#b48bff10}
+.info-red{border-color:var(--red)55;background:#ff6b6b10}
+.science{border:1px solid var(--violet)66;border-radius:14px;padding:14px;background:#b48bff12;margin:8px 0}
+.ok{border:1px solid var(--lime)66;border-radius:14px;padding:14px;background:#b2eb5b12;margin:8px 0}
+.warnbox{border:1px solid var(--amber)66;border-radius:14px;padding:14px;background:#ffcc5512;margin:8px 0}
+.errorbox{border:1px solid var(--red)66;border-radius:14px;padding:14px;background:#ff6b6b12;margin:8px 0}
+.honesty-box{border:2px solid var(--teal)88;border-radius:16px;padding:18px;background:linear-gradient(135deg,#3de6c815,#5ab4ff08);margin:0 0 20px}
+
+/* ===== GRID ===== */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+@media(max-width:560px){
+  .grid{grid-template-columns:1fr}
+  .grid3{grid-template-columns:1fr}
+}
+
+/* ===== FORMS ===== */
+.field{margin-bottom:16px}
+.field label,.field-label{display:block;margin-bottom:6px;color:var(--mut);font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em}
+.field input,.field select,.field textarea{
+  width:100%;border:1.5px solid var(--line);background:#020d1480;color:var(--txt);
+  border-radius:12px;padding:13px 14px;font:inherit;font-size:.95rem;
+  -webkit-appearance:none;appearance:none;
+  transition:border-color .2s;
+}
+.field input:focus,.field select:focus,.field textarea:focus{
+  outline:none;border-color:var(--teal);background:#020d14bb;
+}
+.field textarea{min-height:100px;resize:vertical}
+.field input::placeholder,.field textarea::placeholder{color:var(--mut);opacity:.6}
+.field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237fb3c8' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:38px}
+.placeholder-hint{font-size:.8rem;color:var(--mut);opacity:.75;margin-top:5px;padding:0 2px;font-style:italic;text-align:left}
+
+/* Word counter badge */
+.word-counter{font-size:.75rem;text-align:right;margin-top:4px}
+.word-counter.warn{color:var(--amber)}
+.word-counter.ok{color:var(--lime)}
+
+/* ===== HERO ===== */
+.hero{padding:24px 0 10px;text-align:center}
+.hero-logo{width:110px;height:110px;margin:0 auto 20px;display:grid;place-items:center;background:conic-gradient(var(--teal),var(--violet),var(--amber),var(--lime),var(--blue),var(--teal));border-radius:26px;padding:4px;box-shadow:0 0 32px #3de6c830}
+.hero-logo-inner{width:100%;height:100%;border-radius:22px;background:var(--card);display:grid;place-items:center;font-family:'Syne',sans-serif;font-weight:900;font-size:.62rem;text-align:center;line-height:1.3;color:var(--teal);letter-spacing:.04em}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
+.chip{border:1px solid var(--line);background:#ffffff0d;border-radius:999px;padding:7px 12px;font-size:.8rem;font-weight:700;color:var(--mut)}
+
+/* ===== VIDEO SECTION ===== */
+.video-gate{border:1.5px solid var(--line);border-radius:20px;padding:24px;background:linear-gradient(135deg,#0d2232,#0a1a28);text-align:center;margin:16px 0}
+.video-thumb{position:relative;border-radius:14px;overflow:hidden;background:#000;margin-bottom:16px;aspect-ratio:16/9}
+.video-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.video-thumb-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#00000055}
+.play-icon{width:64px;height:64px;background:rgba(255,0,0,.9);border-radius:50%;display:flex;align-items:center;justify-content:center}
+.play-icon svg{width:28px;height:28px;fill:#fff;margin-left:4px}
+.video-watched{display:flex;align-items:center;gap:10px;margin:14px 0;padding:12px 16px;border:1.5px solid var(--line);border-radius:12px;background:#ffffff08;cursor:pointer;transition:border-color .2s}
+.video-watched:has(input:checked){border-color:var(--lime);background:#b2eb5b10}
+.video-watched input{width:22px;height:22px;accent-color:var(--lime);cursor:pointer;flex-shrink:0}
+.video-watched span{font-weight:700;font-size:.92rem}
+
+/* ===== ENERGY METER ===== */
+.energy-center{text-align:center;padding:16px 0}
+.energy-num{font:900 clamp(4rem,18vw,7rem)/.9 'Syne',sans-serif;color:var(--teal);display:block;margin-bottom:8px}
+input[type=range]{width:100%;height:48px;accent-color:var(--teal);cursor:pointer}
+input[type=range]::-webkit-slider-thumb{width:32px;height:32px}
+
+/* ===== QUIZ ===== */
+.quiz-item{border:1.5px solid var(--line);border-radius:16px;padding:16px;margin:14px 0;background:#ffffff08;transition:border-color .2s}
+.quiz-item.error{border-color:var(--red);background:#ff6b6b0e;box-shadow:0 0 0 3px #ff6b6b22}
+.quiz-item.correct{border-color:var(--lime);background:#b2eb5b0e}
+.quiz-item fieldset{border:0;padding:0;margin:0}
+.quiz-item legend{font:700 .95rem/1.4 'DM Sans',sans-serif;margin-bottom:12px;color:var(--txt);text-align:justify}
+.quiz-q-num{display:inline-flex;width:26px;height:26px;background:var(--teal);color:#04151e;border-radius:50%;align-items:center;justify-content:center;font-weight:900;font-size:.78rem;margin-right:8px;flex-shrink:0;vertical-align:middle}
+.quiz-opt{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:12px;margin:6px 0;cursor:pointer;border:1.5px solid transparent;transition:.15s;background:#ffffff06}
+.quiz-opt:active{background:#3de6c815}
+.quiz-opt:has(input:checked){border-color:var(--teal);background:#3de6c815}
+.quiz-opt input{width:20px;height:20px;accent-color:var(--teal);cursor:pointer;margin-top:1px;flex-shrink:0}
+.quiz-opt span{font-size:.92rem;line-height:1.5;text-align:justify}
+
+/* ===== MULTISELECT CHIPS ===== */
+.option-chips{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.option-chip{border:1.5px solid var(--line);background:#ffffff0a;border-radius:12px;padding:12px 14px;cursor:pointer;font-weight:700;font-size:.88rem;transition:.2s;user-select:none}
+.option-chip.selected{border-color:var(--teal);background:#3de6c815;color:var(--teal)}
+.option-chip:active{transform:scale(.97)}
+
+/* ===== PHASE INTRO ===== */
+.phase-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
+@media(max-width:480px){.phase-cards{grid-template-columns:1fr}}
+.phase-card{border:1.5px solid var(--line);border-radius:16px;padding:16px;background:var(--card)}
+.phase-card h3{font-size:.95rem;margin-bottom:8px}
+.phase-card p{font-size:.85rem;margin:0;color:var(--mut);text-align:justify}
+.phase-card.highlight{border-color:var(--teal)55;background:linear-gradient(135deg,#3de6c810,var(--card))}
+
+/* ===== HABITS LOOP ===== */
+.habit-loop{display:flex;align-items:stretch;gap:0;margin:16px 0;border-radius:16px;overflow:hidden;border:1.5px solid var(--line)}
+.habit-loop-step{flex:1;padding:14px 10px;text-align:center;background:var(--card)}
+.habit-loop-step + .habit-loop-step{border-left:1.5px solid var(--line)}
+.habit-loop-step .step-icon{font-size:1.6rem;margin-bottom:6px}
+.habit-loop-step .step-label{font-family:'Syne',sans-serif;font-weight:900;font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--teal);display:block;margin-bottom:4px}
+.habit-loop-step p{font-size:.78rem;color:var(--mut);margin:0;text-align:center}
+@media(max-width:480px){.habit-loop{flex-direction:column}.habit-loop-step + .habit-loop-step{border-left:0;border-top:1.5px solid var(--line)}}
+
+/* ===== SUBJECTS ===== */
+.subjects{display:grid;gap:8px}
+.subject-row{display:flex;align-items:center;gap:10px;border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;background:#020d1480;transition:.25s}
+.subject-row.r{border-color:var(--red);background:#ff6b6b20;box-shadow:inset 5px 0 0 var(--red)}
+.subject-row.y{border-color:var(--amber);background:#ffcc5520;box-shadow:inset 5px 0 0 var(--amber)}
+.subject-row.g{border-color:var(--lime);background:#b2eb5b20;box-shadow:inset 5px 0 0 var(--lime)}
+.subject-name{flex:1;font-weight:700;font-size:.9rem}
+.lights{display:flex;gap:6px}
+.light{width:38px;height:38px;border-radius:10px;border:2px solid transparent;cursor:pointer;font:900 .82rem/1 'Syne',sans-serif;display:grid;place-items:center;transition:.15s;background:#ffffff15;color:var(--txt)}
+.light:active{transform:scale(.92)}
+.light.r-light{background:#ff6b6b;color:#fff}
+.light.y-light{background:#ffcc55;color:#1f1000}
+.light.g-light{background:#b2eb5b;color:#0a1f0a}
+.light.sel{border-color:#fff;box-shadow:0 0 0 2px #ffffff44;transform:scale(1.08)}
+
+/* ===== SCHEDULE TABLE ===== */
+.sched-wrap{overflow-x:auto;border:1.5px solid var(--line);border-radius:16px;margin:16px 0;-webkit-overflow-scrolling:touch}
+.sched-table{width:100%;min-width:700px;border-collapse:collapse}
+.sched-table th,.sched-table td{border:1px solid var(--line);padding:6px;vertical-align:top;font-size:.8rem}
+.sched-table th{background:#3de6c815;color:var(--teal);font-family:'Syne',sans-serif;font-size:.75rem;letter-spacing:.04em;position:sticky;top:0}
+.sched-table .time-cell{color:var(--amber);font-weight:900;padding:6px;min-width:120px}
+.time-input{display:block;width:100%;background:#020d1460;border:1px solid var(--line);color:var(--amber);border-radius:6px;padding:4px 6px;font:700 .78rem/1.3 'DM Sans',sans-serif;margin-bottom:3px}
+.time-input.label-input{color:var(--mut);font-weight:400;font-size:.7rem}
+.time-input:focus{outline:none;border-color:var(--teal)}
+.del-row-btn{display:block;width:100%;margin-top:3px;background:var(--red)22;border:1px solid var(--red)44;color:var(--red);border-radius:6px;padding:2px 4px;font-size:.7rem;cursor:pointer;font-family:'DM Sans',sans-serif}
+.del-row-btn:hover{background:var(--red)44}
+.cell-block{min-height:90px;display:grid;gap:4px;padding:2px}
+.cell-block.school-cell{background:#5ab4ff08}
+.cell-block.free-cell{background:#b2eb5b08}
+.cell-block.night-cell{background:#b48bff08}
+.cell-block.drop-active{outline:2px solid var(--teal);outline-offset:-2px}
+.cell-mini-select{width:100%;background:var(--card);color:var(--txt);border:1px solid var(--line);border-radius:6px;padding:4px;font-size:.73rem;font-family:inherit}
+.cell-mini-input{width:100%;background:transparent;color:var(--txt);border:1px solid transparent;border-radius:6px;padding:4px;font-size:.73rem;font-family:inherit}
+.cell-mini-input:focus{outline:none;border-color:var(--teal);background:var(--card2)}
+.cell-mini-input::placeholder{color:var(--mut);opacity:.5}
+.cell-act-label{font-size:.72rem;font-weight:700;color:var(--teal)}
+/* Free-editable cells (from 16:40 onwards) */
+.free-editable .cell-act-label{display:none}
+.free-editable .cell-mini-input{border:1px solid var(--teal)22;background:#3de6c806}
+
+/* ===== PALETTE ===== */
+.palette{display:flex;gap:8px;flex-wrap:wrap;padding:10px;border:1.5px solid var(--line);border-radius:14px;background:#020d1488;margin:12px 0}
+.sub-chip{border:1.5px solid var(--line);border-radius:10px;padding:8px 12px;font-weight:900;font-size:.8rem;cursor:pointer;transition:.15s;user-select:none}
+.sub-chip.r{border-color:var(--red)66;background:#ff6b6b10;color:var(--red)}
+.sub-chip.y{border-color:var(--amber)66;background:#ffcc5510;color:var(--amber)}
+.sub-chip.g{border-color:var(--lime)66;background:#b2eb5b10;color:var(--lime)}
+.sub-chip.selected{box-shadow:0 0 0 2.5px var(--teal)}
+.sub-chip:active{transform:scale(.95)}
+
+/* ===== CHECKLIST ===== */
+.checklist{display:grid;gap:10px;margin:12px 0}
+.check-item{display:flex;align-items:flex-start;gap:12px;border:1.5px solid var(--line);border-radius:14px;padding:14px;background:#ffffff07;cursor:pointer;transition:.2s}
+.check-item:has(input:checked){border-color:var(--lime);background:#b2eb5b08}
+.check-item input{width:22px;height:22px;accent-color:var(--lime);cursor:pointer;margin-top:1px;flex-shrink:0}
+.check-item span{font-size:.92rem;font-weight:600;line-height:1.5;text-align:justify}
+
+/* ===== NAV FOOTER ===== */
+.nav{display:flex;gap:10px;margin-top:24px}
+.nav .left{flex:0 0 auto}
+.nav .right{flex:1;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+@media(max-width:480px){
+  .nav{flex-direction:column-reverse}
+  .nav .left,.nav .right{width:100%}
+  .nav .right{flex-direction:column}
+  .btn-full-mob{width:100%}
+}
+
+/* ===== POMODORO ===== */
+.pomo-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+@media(max-width:400px){.pomo-grid{grid-template-columns:1fr}}
+#pcalc{color:var(--teal);font-weight:700;font-size:.88rem;margin:6px 0 0}
+.pomo-main-label{color:var(--teal)!important;font-weight:900!important}
+.pomo-main-input{border-color:var(--teal)!important;box-shadow:0 0 0 3px var(--teal)22!important}
+.pomo-example{background:#3de6c810;border:1px solid var(--teal)44;border-radius:12px;padding:12px 14px;margin:8px 0;font-size:.85rem;text-align:justify}
+.pomo-example strong{color:var(--teal)}
+
+/* ===== SUMMARY ===== */
+.summary-table{width:100%;border-collapse:collapse;font-size:.82rem;min-width:600px}
+.summary-table th,.summary-table td{border:1px solid var(--line);padding:7px;vertical-align:top}
+.summary-table th{background:#3de6c815;color:var(--teal);font-family:'Syne',sans-serif;font-size:.73rem}
+
+/* ===== TOAST ===== */
+.toast{position:fixed;bottom:calc(20px + var(--safe-bottom));left:50%;transform:translateX(-50%) translateY(60px);background:#0d2232;color:#fff;border:1.5px solid var(--teal);border-radius:16px;padding:13px 20px;opacity:0;transition:.25s;z-index:200;font-weight:700;font-size:.9rem;max-width:calc(100vw - 40px);text-align:center;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ===== MODAL ===== */
+.modal{position:fixed;inset:0;display:none;align-items:flex-end;justify-content:center;background:#00000088;z-index:150;padding:0}
+.modal.open{display:flex}
+.modal-panel{width:100%;max-width:560px;background:var(--card);border:1.5px solid var(--line);border-radius:24px 24px 0 0;padding:24px;max-height:90vh;overflow-y:auto}
+@media(min-width:560px){.modal{align-items:center;padding:16px}.modal-panel{border-radius:24px;max-height:85vh}}
+
+/* ===== CONFETTI ===== */
+.confetti-piece{position:fixed;top:-20px;z-index:300;border-radius:3px;animation:confetti-fall 2.5s linear forwards}
+@keyframes confetti-fall{to{transform:translateY(110vh) rotate(720deg);opacity:0}}
+
+/* ===== MISC ===== */
+.divider{height:1px;background:var(--line);margin:20px 0}
+.text-teal{color:var(--teal)}
+.text-lime{color:var(--lime)}
+.text-amber{color:var(--amber)}
+.text-violet{color:var(--violet)}
+.fw-900{font-family:'Syne',sans-serif;font-weight:900}
+.tag{display:inline-flex;background:#3de6c820;color:var(--teal);border-radius:8px;padding:3px 9px;font-size:.75rem;font-weight:800;border:1px solid var(--teal)33}
+.phase-header{margin-bottom:18px}
+.phase-header p{text-align:justify}
+.scroll-hint{text-align:center;font-size:.75rem;color:var(--mut);margin-bottom:6px;opacity:.7}
+hr{border:0;border-top:1px solid var(--line);margin:16px 0}
+.concept-block{border:1.5px solid var(--teal)44;border-radius:16px;padding:16px 18px;background:linear-gradient(135deg,#3de6c810,#020d14);margin:12px 0}
+.concept-block h3{color:var(--teal);margin-bottom:8px}
+.concept-block p{text-align:justify}
+.routine-example{background:#b48bff18;border:1px solid var(--violet)44;border-radius:12px;padding:12px;margin:8px 0;font-size:.88rem;text-align:justify}
+.routine-example strong{color:var(--violet)}
+.info p,.science p,.ok p,.warnbox p,.errorbox p,.card p,.concept-block p,.phase-card p,.honesty-box p,.video-gate p,.energy-center p{text-align:justify}
+
+@media print{.top,.prog-wrap,.nav,.modal,.toast,.palette{display:none!important}body{background:#fff;color:#111}#s8{display:block!important}.screen{display:none!important}#s8.active,.card{background:#fff;border:1px solid #999}}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- TOP -->
+  <div class="top">
+    <div class="brand">🧠 FMM · Rotina Neural</div>
+    <div class="top-actions">
+      <!-- Ícone de acessibilidade (apenas ícone, sem texto) -->
+      <button class="btn btn-icon btn-sm" onclick="openA()" title="Acessibilidade" aria-label="Opções de acessibilidade" style="width:46px;height:46px;padding:0">
+        <svg viewBox="0 0 100 100" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" stroke-width="5"/>
+          <circle cx="50" cy="20" r="9" fill="#5ab4ff"/>
+          <line x1="50" y1="29" x2="50" y2="64" stroke="currentColor" stroke-width="5.5" stroke-linecap="round"/>
+          <line x1="50" y1="44" x2="18" y2="56" stroke="currentColor" stroke-width="5.5" stroke-linecap="round"/>
+          <circle cx="18" cy="56" r="6" fill="#5ab4ff"/>
+          <line x1="50" y1="44" x2="82" y2="56" stroke="currentColor" stroke-width="5.5" stroke-linecap="round"/>
+          <circle cx="82" cy="56" r="6" fill="#5ab4ff"/>
+          <line x1="50" y1="64" x2="30" y2="84" stroke="currentColor" stroke-width="5.5" stroke-linecap="round"/>
+          <circle cx="30" cy="84" r="6" fill="#5ab4ff"/>
+          <line x1="50" y1="64" x2="70" y2="84" stroke="currentColor" stroke-width="5.5" stroke-linecap="round"/>
+          <circle cx="70" cy="84" r="6" fill="#5ab4ff"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="prog-wrap" id="prog">
+    <div class="prog-row">
+      <span class="prog-label" id="phase">Fase 1 de 9</span>
+      <span class="xp-badge">⚡ <span id="xp">0</span> Pontos de Sinapse</span>
+    </div>
+    <div class="prog-bar"><div class="prog-fill" id="fill"></div></div>
+    <div class="prog-dots" id="dots"></div>
+  </div>
+
+  <!-- ===== FASE 0 – Entrada ===== -->
+  <section class="screen active" id="s0">
+    <div class="hero">
+      <div style="margin:0 auto 20px;text-align:center">
+        <img src="logo_16.png" alt="Hábitos e Rotina de Estudos · Planner de Sucesso" style="width:220px;height:auto;filter:drop-shadow(0 4px 24px #3de6c840)">
+      </div>
+      <span class="badge">🎮 Aula-Jogo Avaliativa</span>
+      <h1>Hábitos, Energia e Cronograma Real</h1>
+      <p style="text-align:center">Uma jornada para repensar sua rotina, entender como o cérebro aprende e criar um planner semanal que funciona na prática — especialmente para quem tem uma grade cheia como a do técnico integral.</p>
+      <div class="chips" style="justify-content:center">
+        <span class="chip">⏱ 15–20 min</span>
+        <span class="chip">🧩 Autopercepção</span>
+        <span class="chip">🧪 Quiz científico</span>
+        <span class="chip">📊 Planilha .xlsx</span>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Seus dados</h2>
+      <p>Preencha para começar. As respostas ficam salvas enquanto você joga.</p>
+      <div class="grid">
+        <div class="field"><label>Nome completo</label><input id="nome" placeholder="Ex.: Maria Silva"></div>
+        <div class="field"><label>RA</label><input id="ra" placeholder="Número do RA"></div>
+      </div>
+      <div class="field"><label>Turma</label>
+        <select id="turma">
+          <option value="">Selecione sua turma</option>
+          <option>1AA</option><option>1AB</option><option>1AC</option><option>1AD</option><option>1AE</option>
+          <option>1BA</option><option>1BB</option><option>1BC</option><option>1BD</option><option>1BE</option>
+        </select>
+      </div>
+    </div>
+    <div class="nav">
+      <span></span>
+      <div class="right"><button class="btn primary btn-full-mob" onclick="start()">Começar o jogo →</button></div>
+    </div>
+  </section>
+
+  <!-- ===== FASE 1 – Retomada Meta SMART + Retrospectiva + Diagnóstico ===== -->
+  <section class="screen" id="s1">
+    <div class="phase-header">
+      <span class="badge">Fase 1 · Retomada &amp; Reflexão</span>
+      <h2>Retomada da Aula 4 e Reflexão</h2>
+      <p>Antes de avançar, vamos verificar em formato dissertativo o que foi combinado na Aula 4 — quando você definiu sua Meta SMART. Depois, assista ao vídeo e reflita sobre a percepção que você construiu de si mesmo(a) até aqui.</p>
+    </div>
+
+    <!-- RETOMADA META SMART (antes era na Fase Bônus) -->
+    <div class="card" style="margin-bottom:20px">
+      <h3>📋 Você conseguiu colocar em prática a Meta SMART da Aula 4?</h3>
+      <p style="font-size:.9rem;text-align:justify;margin-bottom:14px">Na Aula 4 você definiu pelo menos uma técnica ou meta para praticar durante a semana — como revisar com repetição espaçada, estudar sem celular, usar Pomodoro ou cuidar do sono. Seja honesto(a): não existe resposta certa ou errada aqui.</p>
+
+      <div class="field">
+        <label>O que você tinha decidido fazer?</label>
+        <p class="placeholder-hint">
+          Escreva com suas palavras qual técnica, meta ou combinação você havia planejado praticar depois da Aula 4.<br>
+          <strong style="color:var(--teal)">Mínimo de 5 palavras.</strong>
+        </p>
+        <textarea id="retomada-decisao" placeholder="Ex.: Eu tinha decidido usar Pomodoro três vezes na semana e revisar Matemática em dias alternados."></textarea>
+        <div class="word-counter" id="retomada-decisao-wc">0 palavras (mín. 5)</div>
+      </div>
+
+      <div class="field" style="margin-top:12px">
+        <label>Conseguiu colocar em prática? Justifique sua resposta</label>
+        <p class="placeholder-hint">
+          O que aconteceu de verdade? Se colocou em prática: o que ajudou? Se não conseguiu: o que dificultou?<br>
+          Sem julgamentos — essa reflexão é para você. <strong style="color:var(--teal)">Mínimo de 5 palavras.</strong>
+        </p>
+        <textarea id="retomada-just" placeholder="Ex.: Consegui usar o Pomodoro nos dias de maior energia, mas no fim da semana o cansaço atrapalhou e acabei estudando com o celular do lado mesmo."></textarea>
+        <div class="word-counter" id="retomada-just-wc">0 palavras (mín. 5)</div>
+      </div>
+    </div>
+
+    <!-- VÍDEO RETROSPECTIVA 1º TRIMESTRE -->
+    <div class="video-gate">
+      <span class="badge" style="margin-bottom:12px">📹 Vídeo Reflexivo · Percepção de Si</span>
+      <p style="margin-bottom:12px;font-size:.9rem;text-align:center">Assista ao vídeo completo. Ele te convida a refletir sobre a <strong>percepção que você construiu de si mesmo(a)</strong> até aqui — seus pontos fortes, suas dificuldades e como outras pessoas podem te ajudar nessa jornada:</p>
+      <!-- ⚠️ PROFESSOR: Substitua o ID no href abaixo pelo ID correto do YouTube -->
+      <a class="btn youtube" href="https://www.youtube.com/watch?v=Il0nz0LHbcM" target="_blank">
+        <svg viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0C.488 3.45.029 5.804 0 12c.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0C23.512 20.55 23.971 18.196 24 12c-.029-6.185-.484-8.549-4.385-8.816zM9 16V8l8 4-8 4z"/></svg>
+        ▶ Assistir Vídeo no YouTube
+      </a>
+      <label class="video-watched">
+        <input type="checkbox" id="vidRetro" onchange="checkRetro()">
+        <span>✅ Já assisti o vídeo</span>
+      </label>
+    </div>
+
+    <!-- PERGUNTA DISSERTATIVA SOBRE O VÍDEO (aparece após marcar que assistiu) -->
+    <div id="retro-q" style="display:none">
+      <div class="field">
+        <label>Sua percepção sobre o vídeo — descreva com suas palavras</label>
+        <p class="placeholder-hint">
+          Reflita: <em>"Que percepção você construiu de si mesmo(a) até agora?"</em> · <em>"Onde você percebe que pode crescer?"</em> · <em>"Como outras pessoas podem te ajudar nessa jornada?"</em><br>
+          <strong style="color:var(--teal)">Mínimo de 5 palavras.</strong>
+        </p>
+        <textarea id="retroPercep" placeholder="Ex.: Percebi que tenho dificuldade de pedir ajuda, mas quando peço, as coisas ficam mais fáceis. Também vi que meus colegas passam pelos mesmos desafios que eu..."></textarea>
+        <div class="word-counter" id="retroPercep-wc">0 palavras (mín. 5)</div>
+      </div>
+    </div>
+
+    <div class="nav">
+      <div class="left"><button class="btn" onclick="go(0)">← Voltar</button></div>
+      <div class="right"><button class="btn primary btn-full-mob" onclick="next(1)">Próxima fase →</button></div>
+    </div>
+  </section>
+
+  <!-- ===== FASE 2 – Energia ===== -->
+  <section class="screen" id="s2">
+    <div class="phase-header">
+      <span class="badge">Fase 2 · Energia</span>
+      <h2>Qual é seu nível de energia agora?</h2>
+      <p>Ser honesto aqui faz diferença. O cérebro com energia baixa retém menos informação — como tentar gravar vídeo com bateria acabando.</p>
+    </div>
+
+    <div class="card energy-center">
+      <span class="energy-num" id="enum">50%</span>
+      <input id="energy" type="range" min="0" max="100" value="50" oninput="energyUp()">
+      <p id="etxt" style="text-align:center">Energia suficiente para continuar com pausas.</p>
+    </div>
+
+    <div class="warnbox" id="elock" style="display:none">
+      <strong>⏸ Volte em outro momento</strong>
+      <p>Com energia abaixo de 40%, o aproveitamento cai muito. Beba água, faça uma pausa e retome quando estiver mais recuperado.</p>
+    </div>
+
+    <div class="concept-block">
+      <h3>💡 Por que isso importa?</h3>
+      <p style="color:var(--mut);margin:0">Você já tentou estudar com sono e não conseguiu lembrar nada no dia seguinte? Isso é real. Sono, alimentação e autopercepção influenciam diretamente o quanto seu cérebro consegue guardar. No seu cronograma, você vai aprender a colocar matérias difíceis nos horários de mais energia.</p>
+    </div>
+
+    <div class="nav">
+      <div class="left"><button class="btn" onclick="go(1)">← Voltar</button></div>
+      <div class="right"><button class="btn primary btn-full-mob" id="enext" onclick="next(2)">Próxima fase →</button></div>
+    </div>
+  </section>
+
+  <!-- ===== FASE 3 – Seu Cérebro Aprende com Repetição ===== -->
+  <section class="screen" id="s3">
+    <div class="phase-header">
+      <span class="badge">Fase 3 · Como o Cérebro Aprende</span>
+      <h2>Seu cérebro aprende com repetição</h2>
+      <p>Quando você repete uma ação muitas vezes, o cérebro tende a <strong>automatizar esse caminho</strong>. Isso vale para bons hábitos — e também para os ruins. Entender esse mecanismo é o primeiro passo para mudar sua rotina de estudos.</p>
+    </div>
+
+    <!-- DADO CIENTÍFICO -->
+    <div class="science" style="margin-bottom:16px">
+      <h3>🔬 O que a ciência diz</h3>
+      <p style="margin:0">O neurocientista <strong style="color:var(--violet)">António Damásio</strong> mostrou que decisões e memórias são fortemente ligadas às emoções e à repetição. Já o pesquisador <strong style="color:var(--violet)">Hermann Ebbinghaus</strong> descobriu, no século XIX, a <strong>Curva do Esquecimento</strong>: sem revisão, esquecemos até <strong style="color:var(--teal)">80% do que aprendemos em 24 horas</strong>. A boa notícia? Revisar em momentos espaçados "reinicia" essa curva e consolida a memória de longo prazo. Estudar consistentemente em blocos pequenos é <strong>comprovadamente mais eficaz</strong> do que maratonar na véspera da prova.</p>
+    </div>
+
+    <div class="phase-cards" style="margin-bottom:16px">
+      <div class="phase-card highlight">
+        <div style="font-size:1.4rem;margin-bottom:8px">🧠</div>
+        <h3>Repetição forma caminhos no cérebro</h3>
+        <p>A cada vez que você revisa um conteúdo, as conexões entre neurônios (sinapses) ficam mais fortes. Isso é chamado de <strong>plasticidade sináptica</strong> — a base biológica do aprendizado.</p>
+      </div>
+      <div class="phase-card">
+        <div style="font-size:1.4rem;margin-bottom:8px">🔍</div>
+        <h3>Olhe para sua prática</h3>
+        <p>Estudar só na véspera ou tentar estudar com o celular chamando atenção também podem virar rotinas automáticas — só que negativas. Identificar esses padrões é o ponto de partida.</p>
+      </div>
+    </div>
+
+    <div class="concept-block" style="margin-bottom:16px">
+      <h3>Exemplo real do 1º ano — estudo espaçado</h3>
+      <p style="color:var(--mut);margin:0">Marina estudava Química por 4 horas numa noite antes da prova — e esquecia quase tudo. Quando aprendeu sobre a Curva do Esquecimento, mudou a estratégia: <strong style="color:var(--teal)">segunda estudou o conceito → terça revisou rápido (R+1) → quinta revisou de novo (R+3) → semana seguinte fez exercícios (R+7).</strong> Na prova, o conteúdo estava fixo na memória de longo prazo. Pequenos blocos diários, repetidos no tempo, valem mais que uma maratona isolada.</p>
+    </div>
+
+    <div class="field" style="margin-top:20px">
+      <label>Qual dessas rotinas aparece com mais frequência na sua vida?</label>
+      <p class="placeholder-hint">Clique para selecionar (pode escolher mais de uma)</p>
+      <div class="option-chips" id="diag-chips">
+        <div class="option-chip" data-v="prova">Estudo só perto da prova</div>
+        <div class="option-chip" data-v="ultima">Deixo tarefas para a última hora</div>
+        <div class="option-chip" data-v="celular">Uso o celular durante o estudo</div>
+        <div class="option-chip" data-v="aula">Dependo apenas da explicação em sala</div>
+        <div class="option-chip" data-v="nenhuma">Nenhuma das anteriores</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Como você descreveria sua rotina de estudos hoje?</label>
+      <p class="placeholder-hint">
+        Descreva como realmente é o seu dia a dia: o que já funciona, o que dificulta, como você se sente em relação aos estudos.<br>
+        <strong style="color:var(--teal)">Mínimo de 5 palavras.</strong>
+      </p>
+      <textarea id="diag-rotina" placeholder="Ex.: Chego do técnico por volta das 17h30, muito cansado. Geralmente como, descanso uns 20 minutos e aí tento estudar, mas acabo usando o celular por mais tempo do que planejei..."></textarea>
+      <div class="word-counter" id="diag-rotina-wc">0 palavras (mín. 5)</div>
+    </div>
+
+    <div class="field">
+      <label>O que geralmente atrapalha mais sua concentração?</label>
+      <p class="placeholder-hint">
+        Ex.: "Fico com o celular do lado", "Tenho irmão pequeno em casa"
+        <br><strong style="color:var(--teal)">Mínimo de 5 palavras.</strong>
+      </p>
+      <textarea id="diag-atrapalha" placeholder="Ex.: Chego do técnico muito cansado e acabo dormindo no sofá. Quando acordo, já é tarde e o estudo não acontece."></textarea>
+      <div class="word-counter" id="diag-atrapalha-wc">0 palavras (mín. 5)</div>
+    </div>
+
+    <hr>
+    <h3 style="margin-bottom:14px">🔄 Como um hábito funciona na prática</h3>
+    <p style="color:var(--mut);margin-bottom:14px">Hábitos funcionam como um circuito simples no cérebro. <strong>Força de vontade não deve ser o único motor.</strong> Uma rotina clara reduz decisões, diminui a procrastinação e protege o foco.</p>
+
+    <div class="habit-loop">
+      <div class="habit-loop-step">
+        <div class="step-icon">🎯</div>
+        <span class="step-label">1. Gatilho</span>
+        <p>É o sinal que inicia o comportamento.</p>
+        <div class="routine-example"><strong>Exemplos seus:</strong> Terminar o jantar, sentar à mesa, abrir o caderno, colocar fone de ouvido.</div>
+      </div>
+      <div class="habit-loop-step">
+        <div class="step-icon">📚</div>
+        <span class="step-label">2. Rotina</span>
+        <p>É a ação repetida em pequenos blocos.</p>
+        <div class="routine-example"><strong>Exemplos seus:</strong> Estudar 25 minutos, resolver 5 questões, revisar os flashcards do dia.</div>
+      </div>
+      <div class="habit-loop-step">
+        <div class="step-icon">🏆</div>
+        <span class="step-label">3. Recompensa</span>
+        <p>O retorno que ajuda o cérebro a repetir.</p>
+        <div class="routine-example"><strong>Exemplos seus:</strong> Marcar no planner, descansar 5 min, ver série por 20 min, jogar no celular.</div>
+      </div>
+    </div>
+
+    <div class="concept-block">
+      <h3>Ambiente, horário e regras simples funcionam mais</h3>
+      <p style="color:var(--mut);margin:0">Esperar a "vontade aparecer" não funciona como estratégia. Criar condições concretas — um horário fixo, um lugar específico, um gatilho claro — é o que transforma o estudo em hábito automático.</p>
+    </div>
+    <hr>
+    <h3>Agora, defina o seu circuito pessoal</h3>
+
+    <div class="field">
+      <label>Escolha um gatilho real para iniciar seu estudo</label>
+      <p class="placeholder-hint">Pense em algo que você já faz todo dia. Ex.: "Depois de jantar", "Quando colocar o fone", "Ao abrir o caderno na mesa"</p>
+      <input id="gatilho" placeholder="Ex.: Terminar o jantar e ligar a luminária da mesa">
+    </div>
+    <div class="field">
+      <label>Escolha uma recompensa saudável</label>
+      <p class="placeholder-hint">
+        Algo que você goste e que sirva como prêmio ao terminar o bloco.<br>
+        <strong style="color:var(--teal)">Mínimo de 5 palavras.</strong>
+      </p>
+      <textarea id="recompensa" placeholder="Ex.: Assistir 1 episódio da série favorita depois de terminar os dois blocos de estudo"></textarea>
+      <div class="word-counter" id="recompensa-wc">0 palavras (mín. 5)</div>
+    </div>
+    <div class="nav">
+      <div class="left"><button class="btn" onclick="go(2)">← Voltar</button></div>
+      <div class="right"><button class="btn primary btn-full-mob" onclick="go(4)">Próxima fase →</button></div>
+    </div>
+  </section>
+
+  <!-- ===== FASE 4 – Estratégias de Aprendizagem ===== -->
+  <section class="screen" id="s4">
+    <div class="phase-header">
+      <span class="badge">Fase 4 · Ciência dos Hábitos</span>
+      <h2>Estratégias de Aprendizagem com base científica</h2>
+      <p>Agora você vai conhecer técnicas que precisam aparecer no seu planner de estudo. Estas são as que mais ajudam o cérebro a guardar informação de verdade.</p>
+    </div>
+
+    <div class="phase-cards">
+      <div class="phase-card highlight">
+        <div style="font-size:1.3rem;margin-bottom:6px">📅</div>
+        <h3>Repetição espaçada</h3>
+        <p>Em vez de maratonar tudo numa noite, você revisa o mesmo conteúdo em dias diferentes. Uma prática simples: retoma o assunto depois de 1 dia, depois de 2 dias e novamente em 7 dias. Isso fortalece a memória de longo prazo.</p>
+        <div class="routine-example"><strong>Na prática:</strong> Segunda estudei Álgebra → Terça revisão rápida → Quinta revisão final</div>
+      </div>
+      <div class="phase-card">
+        <div style="font-size:1.3rem;margin-bottom:6px">🔄</div>
+        <h3>Recuperação ativa</h3>
+        <p>Você pode usar antes do estudo (tentando lembrar o que já sabe) ou depois (fechando o material e explicando sem olhar). Assim você verifica o que realmente aprendeu.</p>
+        <div class="routine-example"><strong>Na prática:</strong> Fecha o caderno e tenta escrever de memória os conceitos principais do que acabou de estudar</div>
+      </div>
+      <div class="phase-card">
+        <div style="font-size:1.3rem;margin-bottom:6px">⏱</div>
+        <h3>Pomodoro: foco curto + pausas</h3>
+        <p>Pomodoro é uma técnica de organização em blocos: você estuda com foco por um período curto, como 25 minutos, e faz uma pausa breve de 5 minutos. Isso protege a atenção.</p>
+        <div class="routine-example"><strong>Na prática:</strong> Celular virado, alarme em 25 min, estudar → pausa de 5 min → próximo bloco</div>
+      </div>
+      <div class="phase-card">
+        <div style="font-size:1.3rem;margin-bottom:6px">😴</div>
+        <h3>Sono, alimentação e autopercepção</h3>
+        <p>Sono adequado, alimentação saudável e se conhecer aumentam sua energia para decisões mais assertivas na hora de montar o cronograma.</p>
+        <div class="routine-example"><strong>Na prática:</strong> Dormir às 22h → acordar mais descansado → estudar matérias difíceis às 19h (não às 23h)</div>
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:16px">
+      <label>Quais técnicas você quer garantir no seu planner?</label>
+      <p class="placeholder-hint">Selecione pelo menos uma:</p>
+      <div class="option-chips" id="tec-chips">
+        <div class="option-chip" data-v="espac">Revisar em 1, 2 e 7 dias</div>
+        <div class="option-chip" data-v="ativa">Explicar sem olhar</div>
+        <div class="option-chip" data-v="pomo">Usar Pomodoro</div>
+        <div class="option-chip" data-v="sono">Cuidar do sono e alimentação</div>
+        <div class="option-chip" data-v="celular_off">Guardar o celular</div>
+      </div>
+    </div>
+
+    <div class="nav">
+      <div class="left"><button class="btn" onclick="go(3)">← Voltar</button></div>
+      <div class="right"><button class="btn primary btn-full-mob" onclick="goQuiz()">Ir para o Quiz →</button></div>
+    </div>
+  </section>
+
+  <!-- ===== FASE 5 – Quiz de Verificação ===== -->
+  <section class="screen" id="s5">
+    <div class="phase-header">
+      <span class="badge">Fase 5 · Estratégias de Aprendizagem</span>
+      <h2>Hora de testar o que você aprendeu</h2>
+      <p>Antes de montar seu cronograma, vamos verificar o que ficou. Responda com calma — não é prova, é para você mesmo saber o que já domina e o que pode reforçar.</p>
+    </div>
+
+    <div class="grid" style="margin-bottom:16px">
+      <div class="field">
+        <label>Palavra da Aula</label>
+        <p class="placeholder-hint">Qual palavra resume melhor o que você aprendeu nas fases anteriores? Ex.: "hábito", "consistência", "foco", "gatilho".</p>
+        <input id="palavra" placeholder="Ex.: consistência">
+      </div>
+      <div class="field">
+        <label>Combina com sua rotina atual?</label>
+        <p class="placeholder-hint">O que você aprendeu se encaixa no que você já faz hoje?</p>
+        <select id="combina">
+          <option value="">Selecione</option>
+          <option>Sim, muito</option>
+          <option>Um pouco</option>
+          <option>Ainda não sei</option>
+          <option>Ainda não, mas quero mudar</option>
+        </select>
+      </div>
+    </div>
+
+    <hr>
+
+    <h3>🧪 Quiz científico — 9 questões</h3>
+    <p style="font-size:.88rem;text-align:justify">Responda com base no que você estudou nas fases anteriores. Marque a alternativa que você acredita ser correta. Ao final, o resultado aparece e você pode conferir as questões marcadas em vermelho. <strong style="color:var(--amber)">⚠️ É necessário pelo menos 7 acertos para avançar.</strong></p>
+    <div id="quiz"></div>
+    <div id="qstat" class="info" style="display:none"></div>
+    <button class="btn warn btn-full" style="margin-top:12px" onclick="grade()">✔ Corrigir quiz</button>
+
+    <div class="nav">
+      <div class="left"><button class="btn" onclick="go(4)">← Voltar</button></div>
+      <div class="right"><button class="btn primary btn-full-mob" onclick="next(5)">Próxima fase →</button></div>
+    </div>
+  </section>
+
+  <!-- ===== FASE 6 – Regra 3-2-1 (Monitoramento) ===== -->
+  <section class="screen" id="s6">
+    <div class="phase-header">
+      <span class="badge">Fase 6 · Monitoramento</span>
+      <h2>Classifique suas matérias</h2>
+      <p>A Regra 3-2-1 ajuda a distribuir seu tempo de forma inteligente. Classifique cada matéria pelo nível de dificuldade que você sente <strong>agora</strong>:</p>
+    </div>
+
+    <!-- MENSAGEM DE HONESTIDADE -->
+    <div class="honesty-box">
+      <div style="display:flex;align-items:flex-start;gap:12px">
+        <span style="font-size:1.8rem;flex-shrink:0">🤝</span>
+        <div>
+          <strong style="color:var(--teal);font-family:'Syne',sans-serif;font-size:1rem">Espaço livre de julgamentos</strong>
+          <p style="margin:8px 0 0;font-size:.9rem;color:var(--mut)">Seja completamente honesto com você mesmo nesta etapa. <strong style="color:var(--txt)">Não existe resposta certa ou errada</strong> — o que importa é a sua percepção real agora. Ninguém vai te avaliar pela classificação que você fizer aqui. Este espaço é seu, para te ajudar a enxergar com clareza onde estão seus maiores desafios e organizar seu tempo de forma inteligente. Quanto mais honesto você for, melhor será o seu cronograma.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid3" style="margin:14px 0">
+      <div class="info-red info" style="text-align:center">
+        <div style="font-size:1.5rem">🔴</div>
+        <strong>3 · Difícil</strong>
+        <p style="font-size:.82rem">Precisa de mais blocos de estudo e foco nos horários de maior energia</p>
+      </div>
+      <div class="info-amber info" style="text-align:center">
+        <div style="font-size:1.5rem">🟡</div>
+        <strong>2 · Média</strong>
+        <p style="font-size:.82rem">Precisa de atenção regular, mas flui melhor</p>
+      </div>
+      <div class="info-lime info" style="text-align:center">
+        <div style="font-size:1.5rem">🟢</div>
+        <strong>1 · Fácil</strong>
+        <p style="font-size:.82rem">Você domina bem. Mantenha com revisões rápidas</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="prog-row">
+        <strong><span id="ccount">0</span>/20 classificadas</strong>
+        <span style="font-size:.82rem;color:var(--mut)">🔴 <span id="cr">0</span> · 🟡 <span id="cy">0</span> · 🟢 <span id="cg">0</span></span>
+      </div>
+      <div class="prog-bar"><div class="prog-fill" id="cfill"></div></div>
+    </div>
+
+    <div class="grid">
+      <div>
+        <h3 style="margin-bottom:10px">📚 FGB (Formação Geral)</h3>
+        <div class="subjects" id="fgb"></div>
+      </div>
+      <div>
+        <h3 style="margin-bottom:10px">🔧 Técnico</h3>
+        <div class="subjects" id="tec"></div>
+      </div>
+    </div>
+
+    <div class="nav">
+      <div class="left"><button class="btn" onclick="go(5)">← Voltar</button></div>
+      <div class="right"><button class="btn primary btn-full-mob" id="mnext" onclick="next(6)" disabled>Próxima →</button></div>
+    </div>
+  </section>
+
+  <!-- ===== FASE 7 – Cronograma ===== -->
+  <section class="screen" id="s7">
+    <div class="phase-header">
+      <span class="badge">Fase 7 · Cronograma Semanal</span>
+      <h2>Monte seu cronograma</h2>
+      <p>Arraste as matérias da paleta para os blocos ou clique em uma matéria e toque em uma célula. <strong>Dica:</strong> coloque matérias 🔴 difíceis nos blocos de maior energia (19h30 em diante). A partir das 16h40, todos os campos estão livres para você preencher suas atividades.</p>
+    </div>
+
+    <div class="grid" style="margin-bottom:14px">
+      <div class="science">
+        <h3>Orientações principais</h3>
+        <p><strong style="color:var(--teal)">📅 Estudo espaçado:</strong> Reserve blocos para revisar em R+1, R+3 e R+7 dias depois de estudar um tópico — isso combate a Curva do Esquecimento.</p>
+        <p><strong style="color:var(--teal)">🎯 Gatilhos:</strong> Associe o início do estudo a uma ação já existente na sua rotina (ex: "depois de jantar, abro o caderno"). Isso automatiza o hábito.</p>
+        <p><strong style="color:var(--teal)">⏱ Pomodoro:</strong> Blocos de 25 min de foco + 5 min de pausa protegem a atenção e evitam fadiga mental.</p>
+        <p><strong style="color:var(--teal)">🔴 Prioridade:</strong> Coloque matérias difíceis nos horários de maior energia (geralmente 19h30+). Matérias 🟢 fáceis podem ficar para horários de menor pique.</p>
+      </div>
+      <!-- CALCULADORA POMODORO APRIMORADA -->
+      <div class="ok">
+        <h3>⏱ Calculadora Pomodoro</h3>
+        <p style="font-size:.82rem;margin-bottom:8px;text-align:justify">Use os <strong>minutos disponíveis por dia</strong> como base para organizar seu estudo diário. Insira o total de minutos livres que você tem para estudar e veja quantos ciclos Pomodoro cabem nesse tempo.</p>
+        <div class="pomo-grid">
+          <div class="field">
+            <label class="pomo-main-label">⭐ Minutos disponíveis/dia</label>
+            <input id="pmin" type="number" value="50" oninput="calcP()" class="pomo-main-input" style="border:1.5px solid var(--teal);box-shadow:0 0 0 3px var(--teal)18;background:var(--card2);color:var(--txt);border-radius:8px;padding:8px;width:100%;font:inherit">
+          </div>
+          <div class="field"><label>Bloco de foco (min)</label><select id="pfocus" onchange="calcP()" style="border:1px solid var(--line);background:var(--card2);color:var(--txt);border-radius:8px;padding:8px;width:100%;font:inherit"><option>25</option><option>30</option><option>40</option><option>50</option></select></div>
+        </div>
+        <p id="pcalc"></p>
+        <div class="pomo-example">
+          <strong>Exemplo prático:</strong> Se você tem <strong>60 minutos</strong> disponíveis e escolhe blocos de <strong>25 min</strong>:
+          60 ÷ (25+5) = <strong>2 ciclos completos</strong> (25 min foco + 5 min pausa) com 0 min sobrando.
+          Com <strong>50 min</strong> → 1 ciclo completo + 20 min extras de foco.
+        </div>
+      </div>
+    </div>
+
+    <div class="palette" id="pal"></div>
+    <p class="scroll-hint">← Deslize para ver todos os dias →</p>
+    <div class="sched-wrap"><table class="sched-table" id="tab"></table></div>
+
+    <div class="nav">
+      <div class="left"><button class="btn" onclick="go(6)">← Voltar</button></div>
+      <div class="right">
+        <button class="btn btn-sm" onclick="resetSched()">🔄 Recriar</button>
+        <button class="btn primary btn-full-mob" onclick="next(7)">Checklist →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FASE 8 – Checklist ===== -->
+  <section class="screen" id="s8">
+    <div class="phase-header">
+      <span class="badge">Fase 8 · Checklist</span>
+      <h2>Verifique seu cronograma</h2>
+      <p>Confira cada item antes de avançar. Marque todos para seguir.</p>
+    </div>
+    <div class="checklist" id="checks">
+      <label class="check-item"><input type="checkbox" value="escola"><span>Incluí escola, intervalos e horários livres no cronograma</span></label>
+      <label class="check-item"><input type="checkbox" value="noite"><span>Incluí rotina noturna com bloco de estudo, descanso e sono</span></label>
+      <label class="check-item"><input type="checkbox" value="321"><span>Usei a Regra 3-2-1 para distribuir as matérias por prioridade</span></label>
+      <label class="check-item"><input type="checkbox" value="revisao"><span>Incluí revisão espaçada (R+1 / R+7) ou recuperação ativa</span></label>
+      <label class="check-item"><input type="checkbox" value="editavel"><span>Sei que posso editar o cronograma quando a semana mudar</span></label>
+      <label class="check-item"><input type="checkbox" value="pomodoro"><span>Planejei usar blocos Pomodoro (25 min foco + pausa)</span></label>
+    </div>
+    <div class="nav">
+      <div class="left"><button class="btn" onclick="go(7)">← Voltar</button></div>
+      <div class="right"><button class="btn primary btn-full-mob" onclick="next(8)">Fase bônus →</button></div>
+    </div>
+  </section>
+
+  <!-- ===== FASE 9 – SMART ===== -->
+  <section class="screen" id="s9">
+    <div class="phase-header">
+      <span class="badge">Bônus · Meta SMART</span>
+      <h2>Planejamento de Futuro</h2>
+      <p>Agora transforme a organização que você construiu no cronograma em uma visão de longo prazo. Use a Meta SMART para definir um próximo passo claro, realista e conectado ao futuro que você quer construir.</p>
+    </div>
+
+    <div class="concept-block">
+      <h3>🎯 O que é uma meta SMART?</h3>
+      <p style="color:var(--mut);margin:0"><strong style="color:var(--teal)">S</strong>pecífica · <strong style="color:var(--teal)">M</strong>ensurável · <strong style="color:var(--teal)">A</strong>lcançável · <strong style="color:var(--teal)">R</strong>elevante · <strong style="color:var(--teal)">T</strong>emporal</p>
+      <div class="routine-example" style="margin-top:10px"><strong>Exemplo ruim:</strong> "Vou estudar mais"<br><strong style="color:var(--lime)">Exemplo SMART:</strong> "Vou estudar Álgebra por 25 minutos toda terça e quinta, às 19h30, por 4 semanas, para tirar pelo menos 7 na próxima prova."</div>
+    </div>
+
+    <div class="grid">
+      <div class="field">
+        <label>Principal desafio para manter esse plano no longo prazo</label>
+        <select id="desafio" onchange="toggleOutro('desafio')">
+          <option value="">Selecione</option>
+          <option>Cansaço ao chegar em casa</option>
+          <option>Celular e redes sociais</option>
+          <option>Procrastinação</option>
+          <option>Falta de local silencioso</option>
+          <option>Acúmulo de tarefas</option>
+          <option>Transporte / tempo de deslocamento</option>
+          <option>Ansiedade antes das avaliações</option>
+          <option value="outro">Outro (descreva abaixo)</option>
+        </select>
+        <input id="desafio-outro" style="display:none;margin-top:8px;width:100%;border:1.5px solid var(--line);background:#020d1480;color:var(--txt);border-radius:12px;padding:13px 14px;font:inherit" placeholder="Descreva seu principal desafio...">
+      </div>
+      <div class="field">
+        <label>Estratégia para sustentar sua organização</label>
+        <select id="estrategia" onchange="toggleOutro('estrategia')">
+          <option value="">Selecione</option>
+          <option>Começar por bloco de 25 minutos</option>
+          <option>Deixar celular longe durante o estudo</option>
+          <option>Usar revisão rápida antes de dormir</option>
+          <option>Separar material antes do banho/jantar</option>
+          <option>Pedir ajuda ao professor ou colega</option>
+          <option>Mover matéria difícil pro horário de mais energia</option>
+          <option value="outro">Outro (descreva abaixo)</option>
+        </select>
+        <input id="estrategia-outro" style="display:none;margin-top:8px;width:100%;border:1.5px solid var(--line);background:#020d1480;color:var(--txt);border-radius:12px;padding:13px 14px;font:inherit" placeholder="Descreva sua estratégia...">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Minha meta SMART</label>
+      <p class="placeholder-hint">
+        Baseie-se no cronograma que você organizou: qual ação concreta você vai manter, com que frequência, por quanto tempo e qual resultado de longo prazo espera alcançar?
+        <br><strong style="color:var(--teal)">Mínimo de 5 palavras.</strong>
+      </p>
+      <input id="smart" placeholder="Ex.: Vou manter dois blocos de 25 min de Matemática toda terça e quinta, às 19h30, por 8 semanas, para chegar mais preparado ao próximo bimestre e ao meu projeto profissional.">
+    </div>
+
+    <div class="field">
+      <label>Por que essa meta importa para você?</label>
+      <p class="placeholder-hint">
+        Conecte com sua visão de futuro: carreira, continuidade dos estudos, autonomia, projeto de vida ou objetivo de longo prazo.
+        <br><strong style="color:var(--teal)">Mínimo de 5 palavras.</strong>
+      </p>
+      <textarea id="porque" placeholder="Ex.: Quero chegar ao fim do ano com mais autonomia para estudar e me preparar para uma área técnica que exige constância, organização e domínio das bases."></textarea>
+      <div class="word-counter" id="porque-wc">0 palavras (mín. 5)</div>
+    </div>
+
+    <div class="nav">
+      <div class="left"><button class="btn" onclick="go(8)">← Voltar</button></div>
+      <div class="right"><button class="btn primary btn-full-mob" onclick="next(9)">Finalizar 🎉</button></div>
+    </div>
+  </section>
+
+  <!-- ===== FASE FINAL ===== -->
+  <section class="screen" id="s10">
+    <div class="phase-header">
+      <span class="badge">🏆 Missão Completa</span>
+      <h2>Seu cronograma está pronto!</h2>
+      <p>Parabéns por concluir a Rotina Neural. Abaixo está o resumo completo da sua jornada.</p>
+    </div>
+    <div class="card" id="final"></div>
+    <div class="nav" style="margin-top:20px">
+      <div class="left"><button class="btn" onclick="go(9)">← Voltar</button></div>
+      <div class="right">
+        <button class="btn" onclick="print()">🖨 PDF / Imprimir</button>
+        <button class="btn good" onclick="downloadXlsx()">📊 Baixar planilha .xlsx</button>
+        <button class="btn primary" onclick="saveResultImage()">🖼 Salvar imagem do resultado</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ACESSIBILIDADE MODAL -->
+<div class="modal" id="am">
+  <div class="modal-panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+      <h2 style="margin:0;display:flex;align-items:center;gap:10px">
+        <svg viewBox="0 0 100 100" width="28" height="28" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="45" fill="none" stroke="#3de6c8" stroke-width="5"/>
+          <circle cx="50" cy="20" r="9" fill="#5ab4ff"/>
+          <line x1="50" y1="29" x2="50" y2="64" stroke="#3de6c8" stroke-width="5.5" stroke-linecap="round"/>
+          <line x1="50" y1="44" x2="18" y2="56" stroke="#3de6c8" stroke-width="5.5" stroke-linecap="round"/>
+          <circle cx="18" cy="56" r="6" fill="#5ab4ff"/>
+          <line x1="50" y1="44" x2="82" y2="56" stroke="#3de6c8" stroke-width="5.5" stroke-linecap="round"/>
+          <circle cx="82" cy="56" r="6" fill="#5ab4ff"/>
+          <line x1="50" y1="64" x2="30" y2="84" stroke="#3de6c8" stroke-width="5.5" stroke-linecap="round"/>
+          <circle cx="30" cy="84" r="6" fill="#5ab4ff"/>
+          <line x1="50" y1="64" x2="70" y2="84" stroke="#3de6c8" stroke-width="5.5" stroke-linecap="round"/>
+          <circle cx="70" cy="84" r="6" fill="#5ab4ff"/>
+        </svg>
+        Acessibilidade
+      </h2>
+      <button class="btn btn-sm" onclick="closeA()">Fechar</button>
+    </div>
+    <div class="grid">
+      <div class="field"><label>Tamanho da fonte</label>
+        <select id="fs" onchange="applyA()">
+          <option value="">Padrão (16px)</option>
+          <option value="large">Grande (18px)</option>
+          <option value="xlarge">Muito grande (20px)</option>
+        </select>
+      </div>
+      <div class="field"><label>Tema visual</label>
+        <select id="vm" onchange="applyA()">
+          <option value="">Padrão (escuro)</option>
+          <option value="contrast">Alto contraste</option>
+          <option value="reading">Modo leitura (claro)</option>
+        </select>
+      </div>
+    </div>
+    <label class="check-item" style="cursor:pointer">
+      <input id="rm" type="checkbox" onchange="applyA()">
+      <span>Reduzir animações</span>
+    </label>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ========== CONSTANTES ==========
+const TOTAL = 10;
+const FGB = ['Arte','Álgebra','Biologia','Educação Física','Filosofia','Física','Geografia','Geometria','Gramática','História','Inglês','Interpretação Textual','Literatura','Projeto de Vida','Química','Sociologia'];
+const TEC = ['Tec. de Materiais','Programação de Computadores','Circuitos Elétricos e Instrumentação','Arquitetura e Manutenção de Computadores'];
+const DAYS = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
+// PER is mutable (editable rows from FREE_FROM onwards)
+let PER = [
+  ['07:00–11:20','Escola manhã','school'],
+  ['11:20–12:50','Intervalo / almoço','free'],
+  ['12:50–16:40','Escola tarde','school'],
+  ['16:40–18:30','Atividade extracurricular','free'],
+  ['18:30–19:30','Descanso e jantar','night'],
+  ['19:30–20:20','Bloco estudo 1','night'],
+  ['20:20–20:35','Pausa','night'],
+  ['20:35–21:25','Bloco estudo 2','night'],
+  ['21:25–22:00','Revisão / organização','night'],
+  ['22:00–23:00','Sono','night']
+];
+// Index a partir do qual as células são livres (16:40+)
+const FREE_FROM = 3;
+
+const ACT = ['','Escola','Intervalo','Trajeto','Descanso','Jantar','Foco 25 min','Foco 30 min','Foco 40 min','Foco 50 min','Revisão R+1','Revisão R+3','Revisão R+7','Recuperação ativa','Tarefas / exercícios','Clube / esporte','Aula particular','Lazer','Sono'];
+
+const QUIZ = [
+  {q:'Por que criar um hábito de estudo reduz a dependência da motivação?',a:'b',opts:[['a','Porque elimina totalmente o cansaço.'],['b','Porque transforma o início do estudo em uma ação mais automática e menos dependente de decidir na hora.'],['c','Porque permite estudar apenas quando der vontade.'],['d','Porque substitui o sono por disciplina.']]},
+  {q:'Qual alternativa descreve recuperação ativa?',a:'c',opts:[['a','Reler o texto várias vezes sem pausa.'],['b','Grifar todas as frases importantes.'],['c','Fechar o material e tentar explicar, responder ou escrever sem olhar.'],['d','Copiar o resumo de outra pessoa.']]},
+  {q:'O que as distrações tendem a causar durante o estudo?',a:'a',opts:[['a','Quebra de foco e menor retenção do conteúdo.'],['b','Aumento automático da memória de longo prazo.'],['c','Mais consolidação porque o cérebro faz duas tarefas.'],['d','Nenhum efeito quando o estudante é jovem.']]},
+  {q:'Estudar em blocos curtos com pausas ajuda porque:',a:'d',opts:[['a','impede qualquer esquecimento.'],['b','substitui a necessidade de revisar.'],['c','funciona apenas para quem já tem notas altas.'],['d','protege a atenção e reduz a sobrecarga mental.']]},
+  {q:'Dormir bem é importante para aprender porque:',a:'b',opts:[['a','faz o cérebro apagar conteúdos difíceis.'],['b','ajuda o cérebro a organizar e consolidar memórias.'],['c','permite estudar menos sempre.'],['d','só influencia o humor, não a aprendizagem.']]},
+  {q:'Revisão espaçada significa:',a:'a',opts:[['a','rever o conteúdo em dias diferentes, como 1, 2 e 7 dias depois.'],['b','estudar tudo em uma única noite.'],['c','revisar somente depois da prova.'],['d','trocar estudo por descanso.']]},
+  {q:'Estudar em horário e local fixos pode ajudar porque:',a:'c',opts:[['a','torna qualquer matéria fácil.'],['b','evita completamente a procrastinação.'],['c','cria gatilhos ambientais para entrar no modo foco.'],['d','dispensa planejamento semanal.']]},
+  {q:'Ensinar alguém ou explicar em voz alta ajuda porque:',a:'d',opts:[['a','é mais rápido do que dormir.'],['b','não exige entender o conteúdo.'],['c','serve apenas para matérias de humanas.'],['d','obriga o cérebro a organizar e recuperar a informação.']]},
+  {q:'Qual troca mostra uma rotina mais saudável?',a:'b',opts:[['a','Estudar só na véspera → dormir menos para compensar.'],['b','Deixar para última hora → reservar blocos curtos durante a semana.'],['c','Mexer no celular estudando → abrir mais abas para pesquisar.'],['d','Depender do professor → nunca revisar sozinho.']]}
+];
+
+// ========== CONFIGURAÇÃO SHEETS ==========
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyderSWa0hvtDU6kwuwzwnsuYlZUT2xjP7wla7JmSgnwEsOCAmkpFZgdMY9w3bvW5I/exec'; // Cole aqui a URL do Web App do Apps Script após publicar.
+
+// ========== ESTADO ==========
+let cur = 0, xp = 0, qok = false, qscore = 0, sel = '';
+const S = { mat:{}, sch:{}, check:[], diagChips:[], tecChips:[], retroWatched:false, retroPercep:'', sheetsSaved:false };
+
+// ========== UTILS ==========
+const $ = id => document.getElementById(id);
+let toastTimer;
+function toast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+function openA(){ $('am').classList.add('open') }
+function closeA(){ $('am').classList.remove('open') }
+function applyA(){
+  document.body.className = [$('fs').value, $('vm').value, $('rm').checked?'reduce':''].filter(Boolean).join(' ');
+}
+
+// ========== WORD COUNT ==========
+function wordCount(val){
+  return val.trim().split(/\s+/).filter(w => w.length > 0).length;
+}
+function minWords(id, n, msg){
+  const el = $(id);
+  if(!el) return true;
+  const wc = wordCount(el.value);
+  if(wc < n){
+    toast(msg || `Escreva pelo menos ${n} palavras neste campo.`);
+    el.focus();
+    return false;
+  }
+  return true;
+}
+function attachWordCounters(){
+  const ids = ['retroPercep','diag-rotina','diag-atrapalha','recompensa','porque','retomada-decisao','retomada-just'];
+  ids.forEach(id => {
+    const el = $(id);
+    if(!el) return;
+    const wcId = id + '-wc';
+    const wcel = $(wcId);
+    if(!wcel) return;
+    const update = () => {
+      const n = wordCount(el.value);
+      wcel.textContent = n + ' palavra(s)' + (n >= 5 ? ' ✓' : ' (mín. 5)');
+      wcel.className = 'word-counter ' + (n >= 5 ? 'ok' : 'warn');
+    };
+    el.addEventListener('input', update);
+    update();
+  });
+}
+
+// ========== PROGRESS ==========
+function prog(){
+  if(cur > 0) $('prog').style.display = 'block';
+  $('phase').textContent = 'Fase ' + Math.min(cur, TOTAL-1) + ' de ' + (TOTAL-1);
+  $('xp').textContent = xp;
+  $('fill').style.width = (cur / TOTAL * 100) + '%';
+  const dots = $('dots');
+  dots.innerHTML = '';
+  for(let i=0;i<TOTAL;i++){
+    const d = document.createElement('i');
+    d.className = 'prog-dot ' + (i<cur?'done':i===cur?'active':'');
+    dots.appendChild(d);
+  }
+}
+function award(n){ xp = Math.min(1000, xp + n); prog(); }
+
+// ========== NAVIGATION ==========
+function go(n){
+  cur = n;
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const sc = $('s'+n);
+  if(sc){ sc.classList.add('active'); }
+  if(n===5){ buildQuiz(); }
+  if(n===6) buildMats();
+  if(n===7){ buildPal(); buildSched(); calcP(); }
+  if(n===10) buildFinal();
+  prog();
+  scrollTo({ top:0, behavior:'smooth' });
+}
+
+function start(){
+  if(!need('nome','Preencha o nome')||!need('ra','Preencha o RA')||!need('turma','Selecione a turma')) return;
+  S.nome = $('nome').value.trim();
+  S.ra = $('ra').value.trim();
+  S.turma = $('turma').value;
+  award(50);
+  go(1);
+}
+
+function goQuiz(){
+  S.tecChips = Array.from(document.querySelectorAll('#tec-chips .option-chip.selected')).map(c=>c.dataset.v);
+  award(80);
+  go(5);
+}
+
+function next(from){
+  if(!validate(from)) return;
+  award(100);
+  go(from + 1);
+}
+
+function need(id, msg){
+  const el = $(id);
+  if(!el || !el.value.trim()){ toast(msg); if(el) el.focus(); return false; }
+  return true;
+}
+
+function validate(f){
+  if(f===1){
+    // Validate retomada Meta SMART em formato dissertativo
+    if(!need('retomada-decisao','Descreva o que você tinha decidido fazer na Meta SMART da Aula 4')) return false;
+    if(!minWords('retomada-decisao', 5, 'Escreva pelo menos 5 palavras sobre o que você tinha decidido fazer.')) return false;
+    if(!need('retomada-just','Explique se conseguiu colocar em prática')) return false;
+    if(!minWords('retomada-just', 5, 'Escreva pelo menos 5 palavras explicando se conseguiu colocar em prática.')) return false;
+    S.retomadaDecisao = $('retomada-decisao').value;
+    S.retomadaJust = $('retomada-just').value;
+    // Se assistiu ao vídeo, exige a percepção
+    if(S.retroWatched){
+      if(!need('retroPercep','Escreva sua percepção sobre o vídeo de retrospectiva.')) return false;
+      if(!minWords('retroPercep', 5, 'Escreva pelo menos 5 palavras sobre sua percepção do vídeo.')) return false;
+      S.retroPercep = $('retroPercep').value;
+    }
+    return true;
+  }
+  if(f===2){
+    if(S.energia < 40){ toast('Energia abaixo de 40%. Descanse e volte em outro momento.'); return false; }
+    return true;
+  }
+  if(f===3){
+    S.diagChips = Array.from(document.querySelectorAll('#diag-chips .option-chip.selected')).map(c=>c.dataset.v);
+    if(!need('diag-rotina','Descreva como é sua rotina de estudos')) return false;
+    if(!minWords('diag-rotina', 5, 'Escreva pelo menos 5 palavras descrevendo sua rotina de estudos.')) return false;
+    if(!need('diag-atrapalha','Descreva o que te atrapalha')) return false;
+    if(!minWords('diag-atrapalha', 5, 'Escreva pelo menos 5 palavras sobre o que atrapalha sua concentração.')) return false;
+    if(!need('gatilho','Defina um gatilho para iniciar o estudo')) return false;
+    if(!need('recompensa','Defina uma recompensa')) return false;
+    if(!minWords('recompensa', 5, 'Escreva pelo menos 5 palavras descrevendo sua recompensa.')) return false;
+    S.diagRotina = $('diag-rotina').value;
+    S.diagAtrapalha = $('diag-atrapalha').value;
+    S.gatilho = $('gatilho').value;
+    S.recompensa = $('recompensa').value;
+    return true;
+  }
+  if(f===5){
+    if(!need('palavra','Preencha a palavra da aula')||!need('combina','Selecione a opção')) return false;
+    if(!qok){ toast('Corrija o quiz antes de avançar'); return false; }
+    if(qscore < 7){ toast('Você precisa de pelo menos 7 acertos no quiz para avançar. Revise o material e tente novamente!'); return false; }
+    S.palavra = $('palavra').value;
+    S.combina = $('combina').value;
+    return true;
+  }
+  if(f===6){
+    if(Object.keys(S.mat).length < 20){ toast('Classifique todas as 20 matérias'); return false; }
+    return true;
+  }
+  if(f===7){
+    saveSched();
+    const blocos = Object.values(S.sch).filter(x => /Foco|Revisão|Recuperação|Tarefas/.test(x.a));
+    if(blocos.length < 2){ toast('Inclua pelo menos dois blocos de estudo ou revisão'); return false; }
+    return true;
+  }
+  if(f===8){
+    const checked = [...document.querySelectorAll('#checks input:checked')];
+    if(checked.length < 6){ toast('Marque todos os itens do checklist'); return false; }
+    S.check = checked.map(x => x.value);
+    return true;
+  }
+  if(f===9){
+    // Meta SMART fields (retomada now validated in f===1)
+    if(!need('desafio','Selecione o desafio')||!need('estrategia','Selecione a estratégia')) return false;
+    if($('desafio').value==='outro'){ if(!$('desafio-outro').value.trim()){ toast('Descreva seu desafio'); return false; } S.desafioOutro=$('desafio-outro').value; }
+    if($('estrategia').value==='outro'){ if(!$('estrategia-outro').value.trim()){ toast('Descreva sua estratégia'); return false; } S.estrategiaOutro=$('estrategia-outro').value; }
+    if(!need('smart','Escreva a meta SMART')) return false;
+    if(!minWords('smart', 5, 'Escreva pelo menos 5 palavras na sua meta SMART.')) return false;
+    if(!need('porque','Explique por que a meta importa')) return false;
+    if(!minWords('porque', 5, 'Escreva pelo menos 5 palavras explicando por que a meta importa.')) return false;
+    S.desafio = $('desafio').value;
+    S.estrategia = $('estrategia').value;
+    S.smart = $('smart').value;
+    S.porque = $('porque').value;
+    return true;
+  }
+  return true;
+}
+
+// ========== ENERGY ==========
+function energyUp(){
+  S.energia = +$('energy').value;
+  $('enum').textContent = S.energia + '%';
+  const low = S.energia < 40;
+  $('elock').style.display = low ? 'block' : 'none';
+  $('enext').disabled = low;
+  $('etxt').textContent = low ? '⚠️ Energia muito baixa para aproveitar bem agora.' : S.energia < 70 ? 'Energia suficiente com pausas a cada 25 min.' : '🚀 Ótima energia! Aproveite para estudar matérias difíceis.';
+}
+
+// ========== VIDEO (Fase 1 Retrospectiva) ==========
+function checkRetro(){
+  const watched = $('vidRetro').checked;
+  S.retroWatched = watched;
+  $('retro-q').style.display = watched ? 'block' : 'none';
+  if(watched){ award(30); }
+}
+
+// ========== VIDEO (Fase 5) – legado removido; quiz abre direto ==========
+function checkVid(){ /* vídeo removido da fase 5 */ }
+
+// ========== QUIZ ==========
+function buildQuiz(){
+  const el = $('quiz');
+  if(!el) return;
+  if(el.dataset.built) return;
+  el.dataset.built = 1;
+  el.innerHTML = QUIZ.map((q,i) =>
+    `<div class="quiz-item" id="qi${i}">
+      <fieldset>
+        <legend><span class="quiz-q-num">${i+1}</span> ${q.q}</legend>
+        ${q.opts.map(o => `<label class="quiz-opt"><input type="radio" name="q${i}" value="${o[0]}"><span>${o[1]}</span></label>`).join('')}
+      </fieldset>
+    </div>`
+  ).join('');
+}
+
+function grade(){
+  let miss = 0, score = 0, first;
+  document.querySelectorAll('.quiz-item').forEach(q => { q.classList.remove('error','correct'); });
+  QUIZ.forEach((q,i) => {
+    const checked = document.querySelector(`input[name="q${i}"]:checked`);
+    const block = $('qi'+i);
+    if(!checked){ miss=1; block.classList.add('error'); first=first||block; }
+    else if(checked.value === q.a){ score++; block.classList.add('correct'); }
+    else { block.classList.add('error'); }
+  });
+  if(miss){ toast('Há questão sem resposta'); first.scrollIntoView({behavior:'smooth',block:'center'}); return; }
+  qok = true;
+  qscore = score;
+  const stat = $('qstat');
+  stat.style.display = 'block';
+  stat.className = score >= 7 ? 'ok' : score >= 5 ? 'warnbox' : 'errorbox';
+  stat.innerHTML = `<strong>${score >= 7 ? '🏆' : score >= 5 ? '⚡' : '📚'} Resultado: ${score}/${QUIZ.length} acertos</strong><br>
+    ${score >= 7 ? 'Excelente! Você dominou bem os conceitos desta etapa.' : score >= 7 ? 'Excelente! Você dominou bem os conceitos desta etapa.' : score >= 5 ? 'Bom resultado! Revise os itens marcados em vermelho. Você precisa de 7+ acertos para avançar.' : 'Revise o material das fases anteriores e tente novamente. São necessários 7 acertos para avançar.'}`;
+  award(score * 20);
+}
+
+// ========== MATÉRIAS ==========
+function buildMats(){
+  if($('fgb').children.length) return;
+  FGB.forEach(n => $('fgb').appendChild(matRow(n)));
+  TEC.forEach(n => $('tec').appendChild(matRow(n)));
+}
+
+function matRow(name){
+  const d = document.createElement('div');
+  d.className = 'subject-row';
+  d.innerHTML = `<span class="subject-name">${name}</span>
+    <div class="lights">
+      <button class="light r-light" title="Difícil" aria-label="Difícil">3</button>
+      <button class="light y-light" title="Média" aria-label="Média">2</button>
+      <button class="light g-light" title="Fácil" aria-label="Fácil">1</button>
+    </div>`;
+  d.querySelectorAll('.light').forEach(b => b.addEventListener('click', () => {
+    const c = b.classList.contains('r-light')?'r': b.classList.contains('y-light')?'y':'g';
+    S.mat[name] = c;
+    d.className = 'subject-row ' + c;
+    d.querySelectorAll('.light').forEach(x => x.classList.remove('sel'));
+    b.classList.add('sel');
+    updateMatCount();
+  }));
+  return d;
+}
+
+function updateMatCount(){
+  const vals = Object.values(S.mat);
+  const ct = {r:0,y:0,g:0};
+  vals.forEach(v => ct[v]++);
+  $('ccount').textContent = vals.length;
+  $('cr').textContent = ct.r;
+  $('cy').textContent = ct.y;
+  $('cg').textContent = ct.g;
+  $('cfill').style.width = (vals.length / 20 * 100) + '%';
+  $('mnext').disabled = vals.length < 20;
+}
+
+// ========== CRONOGRAMA ==========
+function buildPal(){
+  const p = $('pal');
+  p.innerHTML = '';
+  Object.entries(S.mat).forEach(([name, c]) => {
+    const e = document.createElement('button');
+    e.className = 'sub-chip ' + c;
+    e.textContent = (c==='r'?'🔴 ':c==='y'?'🟡 ':'🟢 ') + name;
+    e.addEventListener('click', () => {
+      sel = name;
+      document.querySelectorAll('.sub-chip').forEach(x => x.classList.remove('selected'));
+      e.classList.add('selected');
+    });
+    e.addEventListener('dragstart', ev => ev.dataTransfer.setData('text/plain', name));
+    e.draggable = true;
+    p.appendChild(e);
+  });
+}
+
+/**
+ * Retorna [actDefault, labelText, noteDefault] para células FIXAS (escola/intervalo).
+ * Para células livres (índice >= FREE_FROM), retorna vazio para permitir edição livre.
+ */
+function defCell(i, p){
+  if(i === 0 || i === 2) return ['Escola', p[1], ''];
+  if(i === 1) return ['Intervalo', 'Intervalo / almoço', ''];
+  // A partir de 16:40: edição livre, sem texto pré-definido
+  return ['', '', ''];
+}
+
+function buildSched(){
+  if($('tab').dataset.ok) return;
+  $('tab').dataset.ok = 1;
+  resetSched();
+}
+
+function resetSched(){
+  savePERFromTable(); // save any live edits before reset-rebuild
+  let h = '<thead><tr><th style="min-width:120px">Horário</th>' + DAYS.map(d=>`<th>${d}</th>`).join('') + '</tr></thead><tbody>';
+  PER.forEach((p, i) => {
+    const isFreeRow = i >= FREE_FROM;
+    const timeEdit = isFreeRow
+      ? `<input class="time-input" data-pi="${i}" data-f="time" value="${p[0]}" placeholder="Ex: 16:40–17:30">`
+      : `<span>${p[0]}</span>`;
+    const labelEdit = isFreeRow
+      ? `<input class="time-input label-input" data-pi="${i}" data-f="label" value="${p[1]}" placeholder="Ex: Lazer">`
+      : `<small style="color:var(--mut);font-weight:400;font-size:.7rem">${p[1]}</small>`;
+    const delBtn = isFreeRow
+      ? `<button class="del-row-btn" onclick="deleteRow(${i})" title="Remover linha">✕</button>`
+      : '';
+    h += `<tr data-pi="${i}"><td class="time-cell">${timeEdit}${labelEdit}${delBtn}</td>`;
+    DAYS.forEach(d => {
+      const def = defCell(i, p);
+      const isFree = i >= FREE_FROM; // Célula editável a partir das 16h40
+      const colClass = p[2]==='school'?'school-cell':p[2]==='free'?'free-cell':'night-cell';
+      const freeClass = isFree ? ' free-editable' : '';
+
+      if(!isFree){
+        // Células fixas (escola, intervalo) — apenas select pré-definido
+        h += `<td><div class="cell-block ${colClass}${freeClass}" data-d="${d}" data-t="${p[0]}" onclick="clickCell(this)" ondragover="over(event)" ondragleave="leave(event)" ondrop="dropC(event)">
+          <div class="cell-act-label">${def[1]}</div>
+          <select class="cell-mini-select">${ACT.map(a=>`<option ${a===def[0]?'selected':''}>${a}</option>`).join('')}</select>
+          <input class="cell-mini-input" placeholder="Matéria / obs." value="${def[2]}">
+        </div></td>`;
+      } else {
+        // Células livres (16:40+) — sem label padrão, tudo editável
+        h += `<td><div class="cell-block ${colClass}${freeClass}" data-d="${d}" data-t="${p[0]}" onclick="clickCell(this)" ondragover="over(event)" ondragleave="leave(event)" ondrop="dropC(event)">
+          <div class="cell-act-label"></div>
+          <select class="cell-mini-select">${ACT.map(a=>`<option value="${a}">${a}</option>`).join('')}</select>
+          <input class="cell-mini-input" placeholder="Sua atividade aqui..." value="">
+        </div></td>`;
+      }
+    });
+    h += '</tr>';
+  });
+  h += '</tbody>';
+  $('tab').innerHTML = h;
+  $('tab').dataset.ok = 1;
+  // Add "Add row" button below table
+  let addBtn = document.getElementById('add-row-btn');
+  if(!addBtn){
+    addBtn = document.createElement('button');
+    addBtn.id = 'add-row-btn';
+    addBtn.className = 'btn btn-sm';
+    addBtn.style = 'margin-top:8px;width:100%';
+    addBtn.innerHTML = '➕ Adicionar linha de horário';
+    addBtn.onclick = addRow;
+    $('tab').parentElement.after(addBtn);
+  }
+  // Attach live-update to time/label inputs
+  document.querySelectorAll('.time-input').forEach(inp => {
+    inp.addEventListener('change', () => {
+      const pi = +inp.dataset.pi;
+      const f = inp.dataset.f;
+      if(f==='time') PER[pi][0] = inp.value;
+      if(f==='label') PER[pi][1] = inp.value;
+    });
+  });
+}
+
+function savePERFromTable(){
+  document.querySelectorAll('.time-input').forEach(inp => {
+    const pi = +inp.dataset.pi;
+    if(pi < FREE_FROM || pi >= PER.length) return;
+    const f = inp.dataset.f;
+    if(f==='time') PER[pi][0] = inp.value;
+    if(f==='label') PER[pi][1] = inp.value;
+  });
+}
+
+function addRow(){
+  savePERFromTable();
+  PER.push(['—','Nova atividade','night']);
+  $('tab').dataset.ok = '';
+  resetSched();
+}
+
+function deleteRow(i){
+  if(i < FREE_FROM){ toast('Não é possível remover linhas fixas de escola'); return; }
+  savePERFromTable();
+  PER.splice(i, 1);
+  $('tab').dataset.ok = '';
+  resetSched();
+}
+
+function clickCell(c){
+  if(sel) c.querySelector('.cell-mini-input').value = sel;
+}
+function over(e){ e.preventDefault(); e.currentTarget.classList.add('drop-active'); }
+function leave(e){ e.currentTarget.classList.remove('drop-active'); }
+function dropC(e){
+  e.preventDefault();
+  const name = e.dataTransfer.getData('text/plain');
+  e.currentTarget.classList.remove('drop-active');
+  e.currentTarget.querySelector('.cell-mini-input').value = name;
+  sel = name;
+}
+function saveSched(){
+  S.sch = {};
+  document.querySelectorAll('.cell-block').forEach(c => {
+    S.sch[c.dataset.d+'|'+c.dataset.t] = {
+      d: c.dataset.d, t: c.dataset.t,
+      title: c.querySelector('.cell-act-label').textContent,
+      a: c.querySelector('select').value,
+      n: c.querySelector('input').value
+    };
+  });
+}
+
+function calcP(){
+  const total = +$('pmin').value || 0;
+  const focus = +$('pfocus').value || 25;
+  const cycle = focus + 5;
+  const n = Math.floor(total / cycle);
+  const left = total - n * cycle;
+  $('pcalc').textContent = `${total} min = ${n} ciclo(s) de ${focus} min foco + 5 min pausa` + (left ? `, sobra ${left} min.` : '.');
+}
+
+// ========== FINAL ==========
+function buildFinal(){
+  saveSched();
+  const by = c => Object.entries(S.mat).filter(([,v])=>v===c).map(([k])=>k).join(', ') || '—';
+  let rows = '';
+  PER.forEach(p => {
+    rows += `<tr><td><strong>${p[0]}</strong><br><small>${p[1]}</small></td>`;
+    DAYS.forEach(d => {
+      const s = S.sch[d+'|'+p[0]];
+      rows += `<td><b>${esc(s?.a||'')}</b><br><small>${esc(s?.n||s?.title||'')}</small></td>`;
+    });
+    rows += '</tr>';
+  });
+  $('final').innerHTML = `
+    <div class="grid" style="margin-bottom:16px">
+      <div class="info-teal info"><h3>👤 Estudante</h3><p><strong>${esc(S.nome)}</strong><br>RA: ${esc(S.ra)}<br>Turma: ${esc(S.turma)}<br>Energia: ${S.energia}%</p></div>
+      <div class="ok"><h3>🏆 Resultado</h3><p>Quiz: ${qscore}/${QUIZ.length}<br>⚡ ${xp} Pontos de Sinapse<br>Meta: ${esc((S.smart||'').slice(0,60)+'...')}</p></div>
+    </div>
+    <div class="grid3" style="margin-bottom:16px">
+      <div class="info-red info"><h3>🔴 3 · Difíceis</h3><p style="font-size:.82rem">${esc(by('r'))}</p></div>
+      <div class="info-amber info"><h3>🟡 2 · Médias</h3><p style="font-size:.82rem">${esc(by('y'))}</p></div>
+      <div class="info-lime info"><h3>🟢 1 · Fáceis</h3><p style="font-size:.82rem">${esc(by('g'))}</p></div>
+    </div>
+    <h3>Cronograma semanal</h3>
+    <div style="overflow-x:auto;border:1px solid var(--line);border-radius:12px;margin:10px 0">
+      <table class="summary-table"><thead><tr><th>Horário</th>${DAYS.map(d=>`<th>${d}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <h3>Suas respostas-chave</h3>
+      <p><strong>Rotina descrita:</strong> ${esc((S.diagRotina||'').slice(0,120))}<br><strong>Atrapalha:</strong> ${esc(S.diagAtrapalha||'')}<br><strong>Gatilho:</strong> ${esc(S.gatilho)}<br><strong>Recompensa:</strong> ${esc(S.recompensa)}<br><strong>Desafio:</strong> ${esc(S.desafio==='outro'?S.desafioOutro:S.desafio)}<br><strong>Estratégia:</strong> ${esc(S.estrategia==='outro'?S.estrategiaOutro:S.estrategia)}<br><strong>Por quê importa:</strong> ${esc(S.porque)}</p>
+      ${S.retroPercep ? `<p><strong>Percepção do vídeo retrospectiva:</strong> ${esc(S.retroPercep)}</p>` : ''}
+      ${S.retomadaJust ? `<p><strong>Retomada Aula 4 — decidiu fazer:</strong> ${esc(S.retomadaDecisao||'')}<br><strong>Justificativa:</strong> ${esc(S.retomadaJust)}</p>` : ''}
+    </div>`;
+  confetti();
+  saveActivityToSheets();
+}
+
+function buildSheetsPayload(){
+  saveSched();
+  return {
+    timestamp: new Date().toISOString(),
+    estudante: { nome:S.nome||'', ra:S.ra||'', turma:S.turma||'', energia:S.energia||0 },
+    fase1: { decisao:S.retomadaDecisao||'', justificativa:S.retomadaJust||'', videoAssistido:!!S.retroWatched, percepcaoVideo:S.retroPercep||'' },
+    fase3: { rotinas:S.diagChips||[], rotinaEstudos:S.diagRotina||'', atrapalha:S.diagAtrapalha||'', gatilho:S.gatilho||'', recompensa:S.recompensa||'' },
+    quiz: { acertos:qscore, total:QUIZ.length, palavra:S.palavra||'', combina:S.combina||'' },
+    materias:S.mat,
+    cronograma:S.sch,
+    checklist:S.check||[],
+    smart: { desafio:S.desafio==='outro'?S.desafioOutro:S.desafio||'', estrategia:S.estrategia==='outro'?S.estrategiaOutro:S.estrategia||'', meta:S.smart||'', porque:S.porque||'' },
+    xp
+  };
+}
+
+function saveActivityToSheets(){
+  if(S.sheetsSaved) return;
+  if(!APPS_SCRIPT_URL){
+    toast('Configure a URL do Apps Script para salvar no Sheets.');
+    return;
+  }
+  S.sheetsSaved = true;
+  fetch(APPS_SCRIPT_URL, {
+    method:'POST',
+    mode:'no-cors',
+    headers:{ 'Content-Type':'text/plain;charset=utf-8' },
+    body: JSON.stringify(buildSheetsPayload())
+  }).then(() => toast('Atividade enviada para o Sheets.')).catch(() => {
+    S.sheetsSaved = false;
+    toast('Não foi possível enviar para o Sheets.');
+  });
+}
+// ========== OPTION CHIPS ==========
+document.addEventListener('click', e => {
+  const chip = e.target.closest('.option-chip');
+  if(chip) chip.classList.toggle('selected');
+});
+
+// ========== XLSX EXPORT ==========
+function downloadXlsx(){
+  saveSched();
+  const blob = new Blob([zipFiles(buildBook())], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'cronograma_' + (S.nome||'estudante').replace(/\s+/g,'_') + '.xlsx';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+function buildBook(){
+  savePERFromTable();
+  // ABA 1: Cronograma Semanal
+  const cron = [['CRONOGRAMA SEMANAL - '+(S.nome||''),'RA: '+(S.ra||''),'Turma: '+(S.turma||''),'Energia: '+S.energia+'%'],['Horário'].concat(DAYS)];
+  PER.forEach(p => cron.push([p[0]+' – '+p[1]].concat(DAYS.map(d=>{const s=S.sch[d+'|'+p[0]];return(s?.a||'')+(s?.n?' - '+s.n:'')}))));
+
+  // ABA 2: Revisões Espaçadas (estilo EAOP)
+  const rev = [
+    ['REVISÕES ESPAÇADAS — Ebbinghaus (1885) + Cepeda et al. (2006)','','','','','','','',''],
+    ['Sem revisão, o cérebro esquece ~70-80% do conteúdo em 24h. As revisões espaçadas interrompem essa curva.','','','','','','','',''],
+    ['Instrução: Ao estudar um tópico novo, registre aqui. Preencha ✓ quando revisar nas datas indicadas. Marque ✅ quando dominar.','','','','','','','',''],
+    [''],
+    ['#','Matéria','Nível (🔴/🟡/🟢)','Tópico Estudado','Data Estudo','R+1 (dia seg.)','R+3 (+3 dias)','R+7 (+1 sem)','R+14 (+2 sem)','✅ Dominei']
+  ];
+
+  // ABA 3: Controle de Questões (estilo EAOP)
+  const perf = [
+    ['CONTROLE DE QUESTÕES — Meta: ≥ 70% de acertos por tópico — Dunlosky et al. (2013)','','','','','','','','',''],
+    ['Como usar: Registre cada sessão de questões. Calcule % de acerto = Acertos ÷ Total. Meta: ≥ 70%. Abaixo de 70% → revise teoria → pratique mais questões similares.','','','','','','','','',''],
+    ['Instrução: Para cada erro → identifique o tópico → revise a teoria → resolva mais questões similares.','','','','','','','',''],
+    [''],
+    ['#','Matéria','Nível','Tópico','Questões Resolvidas','Acertos','Erros','% Acerto','Status','Próxima Ação']
+  ];
+
+  Object.entries(S.mat).forEach(([m,cl],i) => {
+    const n = cl==='r'?'🔴 Difícil':cl==='y'?'🟡 Média':'🟢 Fácil';
+    const nNum = cl==='r'?3:cl==='y'?2:1;
+    const status = nNum===3?'Prioridade alta':nNum===2?'Atenção regular':'Revisão rápida';
+    const acao = nNum===3?'Blocos diários + revisão espaçada':nNum===2?'Revisão semanal + questões':'Flashcards e revisão leve';
+    rev.push([i+1,m,n,'','','','','','','']);
+    perf.push([i+1,m,n,'',0,0,0,'—',status,acao]);
+  });
+  // Extra blank rows for future topics in revisões e questões
+  for(let i=Object.keys(S.mat).length;i<50;i++) rev.push([i+1,'','','','','','','','','']);
+  for(let i=Object.keys(S.mat).length;i<60;i++) perf.push([i+1,'','','','','','','','','']);
+
+  // ABA 4: Resumo
+  const resumo = [
+    ['RESUMO DO ESTUDANTE'],[''],
+    ['Nome',S.nome||''],['RA',S.ra||''],['Turma',S.turma||''],['Energia',S.energia+'%'],
+    ['Quiz',qscore+'/'+QUIZ.length],['Gatilho',S.gatilho||''],['Recompensa',S.recompensa||''],
+    ['Desafio',(S.desafio==='outro'?S.desafioOutro:S.desafio)||''],['Estratégia',(S.estrategia==='outro'?S.estrategiaOutro:S.estrategia)||''],['Meta SMART',S.smart||''],
+    ['Por que importa',S.porque||''],['Percepção vídeo',S.retroPercep||''],
+    ['Rotina de Estudos (descrita)',S.diagRotina||''],
+    ['Diagnóstico','Atrapalha: '+(S.diagAtrapalha||'')],
+    ['Retomada Aula 4 – decidiu',S.retomadaDecisao||''],
+    ['Retomada Aula 4 – justificativa',S.retomadaJust||'']
+  ];
+
+  // ABA 5: Espaços e Ambientes de Estudo + Ferramentas Digitais
+  const ambientes = [
+    ['ESPAÇOS E AMBIENTES DE ESTUDO'],
+    ['O local físico onde você estuda influencia diretamente seu rendimento e concentração.'],
+    [''],
+    ['Tipo de Ambiente','Características','Ideal para','Dicas práticas'],
+    ['Casa – Quarto','Familiar, pode ter distrações digitais e pessoais','Revisão tranquila, leitura profunda, flashcards','Mesa organizada, boa iluminação, celular em outro cômodo'],
+    ['Casa – Mesa de jantar','Às vezes movimentado, presença da família','Tarefas rápidas, exercícios','Use fone com cancelamento de ruído, avise a família com antecedência'],
+    ['Escola – Biblioteca','Silencioso, estruturado, sem distrações do lar','Estudo focado, pesquisa, resolução de provas antigas','Vá nos intervalos; leve material organizado com a lista do que estudar'],
+    ['Escola – Sala vazia','Silencioso após o horário de aula','Grupos de estudo, revisão colaborativa','Combine o tema com colegas antes de ir; defina quem explica cada parte'],
+    ['Café / Espaço público','Ruído branco moderado, ambiente neutro','Leitura, redação de resumos, brainstorming','Use fone de ouvido; bloqueie redes sociais com aplicativo'],
+    ['Transporte (ônibus/metrô)','Tempo ocioso aproveitável','Revisão de flashcards, podcasts educativos, áudio de resumos','Prepare o material no NotebookLM como áudio; use Anki offline'],
+    [''],
+    ['COMO O AMBIENTE IMPACTA O RENDIMENTO'],
+    ['1. Iluminação','Luz natural ou branca aumenta alerta e concentração. Luz amarela relaxa — útil para leitura leve antes de dormir.'],
+    ['2. Ruído','Silêncio total é ideal para matemática. Ruído branco suave (café, chuva) pode ajudar na escrita e leitura.'],
+    ['3. Temperatura','Ambientes frescos (18–22°C) favorecem foco. Calor excessivo aumenta sonolência.'],
+    ['4. Organização','Mesa organizada reduz carga cognitiva. Tenha APENAS o material da matéria atual à vista.'],
+    ['5. Postura','Estude sentado a uma mesa para tarefas que exigem atenção. Reserve a cama apenas para dormir.'],
+    [''],
+    ['FERRAMENTAS DIGITAIS DE APOIO AO ESTUDO'],
+    [''],
+    ['Ferramenta','O que é','Como usar','Benefício principal','Dica extra'],
+    ['NotebookLM (Google)','IA do Google que lê PDFs e anotações suas e responde perguntas','Cole seus PDFs de apostila ou links de artigos e peça resumos, questões ou flashcards','Transforma seu material em fontes interativas que a IA conhece de verdade','Crie um Notebook por matéria; alimente com PDFs das apostilas, slides e artigos'],
+    ['NotebookLM – Resumos','Recurso de geração de resumo completo','Abra um Notebook e clique em "Guia de estudo" ou peça: "Crie um resumo completo deste material"','Resume horas de leitura em minutos, mantendo os conceitos-chave','Peça ao NotebookLM para incluir exemplos e conectar os conceitos entre si'],
+    ['NotebookLM – Flashcards','Geração automática de perguntas e respostas','Peça: "Gere flashcards sobre os principais conceitos deste material"','Flashcards alinhados ao seu conteúdo real, não genéricos','Exporte os flashcards e importe no Anki para revisão espaçada automática'],
+    ['NotebookLM – Questões','Simulado personalizado com base no seu material','Peça: "Crie 10 questões de múltipla escolha sobre [tema] com gabarito"','Treino com questões do conteúdo exato que você estudou','Após responder, peça ao NotebookLM para explicar cada erro que você cometer'],
+    ['NotebookLM – Podcast','Geração de episódio de podcast em áudio com dois "apresentadores" IA debatendo seu material','Abra um Notebook com seu PDF/apostila, clique em "Gerar áudio" (ícone de fone) e em seguida em "Generate"','Transforma horas de leitura em um podcast de 10-15 min fácil de ouvir no trajeto ou na academia','Use no transporte ou ao fazer outra tarefa leve; ouça 1-2x para fixar o conceito antes de estudar o texto'],
+    ['Gemini (Google)','Assistente de IA avançado para conversas e criação de conteúdo','Descreva o conteúdo que precisa revisar e peça simulados, explicações ou mapas mentais','Versatilidade: explica, cria questões, monta planos e debate ideias','Dê contexto: "Sou aluno do 1º ano técnico e preciso de simulado sobre [tema] nível ENEM"'],
+    ['Gemini – Simulados','Criação de provas completas com gabarito comentado','Peça: "Monte um simulado com 15 questões sobre [tema], nível ENEM, com gabarito comentado"','Preparo para provas com feedback imediato','Faça a prova no papel, depois confira e peça ao Gemini para explicar os erros'],
+    ['Gemini – Questões ENEM/EAOP','Geração de questões no estilo de vestibulares e concursos','Peça: \"Monte 10 questões estilo ENEM/EAOP sobre [tema] com 5 alternativas e gabarito comentado\"','Treino direcionado ao formato das provas que você vai fazer','Informe o ano, cargo ou vestibular-alvo para calibrar a dificuldade; peça versão difícil após acertar'],
+    ['Gemini – Revisão inteligente','Identificação de lacunas de aprendizado','Cole seu resumo e peça: "Quais lacunas de aprendizado você identifica no meu resumo?"','Feedback objetivo sobre o que você ainda não domina','Combine com NotebookLM: use Gemini para diagnosticar e NotebookLM para aprofundar'],
+    ['Gemini – Planejamento','Apoio para organizar semana de estudos','Descreva sua grade e diga: "Tenho X horas por semana. Monte um plano de estudos para [matérias]"','Plano personalizado e adaptável','Atualize o plano a cada semana conforme as provas se aproximam'],
+    [''],
+    ['FLUXO RECOMENDADO: PLANNER + IA'],
+    ['Passo','Quando','O que fazer','Ferramenta'],
+    ['1. Após a aula','No mesmo dia ou dia seguinte','Cole os slides/anotações no NotebookLM e gere um resumo + flashcards','NotebookLM'],
+    ['1b. Podcast','Mesma noite ou manhã seguinte','Gere o podcast do NotebookLM e ouça no trajeto ou pela manhã','NotebookLM – Podcast'],
+    ['2. Revisão R+1','1 dia após estudar','Responda os flashcards do NotebookLM sem olhar o material','NotebookLM + Anki'],
+    ['3. Revisão R+3/R+7','3 e 7 dias após','Resolva um mini-simulado estilo EAOP/ENEM gerado pelo Gemini','Gemini – Questões ENEM/EAOP'],
+    ['4. Antes da prova','2-3 dias antes','Peça ao Gemini um simulado completo com gabarito comentado','Gemini'],
+    ['5. Pós-prova','Após receber o resultado','Identifique os erros e peça ao NotebookLM para reexplicar esses pontos','NotebookLM'],
+  ];
+
+  const files = {
+    '[Content_Types].xml': ct5(),
+    '_rels/.rels': rr(),
+    'xl/workbook.xml': wb5(),
+    'xl/_rels/workbook.xml.rels': wr5(),
+    'xl/worksheets/sheet1.xml': sheet(cron),
+    'xl/worksheets/sheet2.xml': sheet(rev),
+    'xl/worksheets/sheet3.xml': sheet(perf),
+    'xl/worksheets/sheet4.xml': sheet(resumo),
+    'xl/worksheets/sheet5.xml': sheet(ambientes)
+  };
+  return files;
+}
+
+function ct5(){return'<?xml version="1.0"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/worksheets/sheet2.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/worksheets/sheet3.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/worksheets/sheet4.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/worksheets/sheet5.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>'}
+function rr(){return'<?xml version="1.0"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>'}
+function wb5(){return'<?xml version="1.0"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Cronograma Semanal" sheetId="1" r:id="rId1"/><sheet name="Revisões Espaçadas" sheetId="2" r:id="rId2"/><sheet name="Controle de Questões" sheetId="3" r:id="rId3"/><sheet name="Resumo" sheetId="4" r:id="rId4"/><sheet name="Espaços e Ambientes" sheetId="5" r:id="rId5"/></sheets></workbook>'}
+function wr5(){return'<?xml version="1.0"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet2.xml"/><Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet3.xml"/><Relationship Id="rId4" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet4.xml"/><Relationship Id="rId5" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet5.xml"/></Relationships>'}
+function col(n){let s='';while(n>0){const m=(n-1)%26;s=String.fromCharCode(65+m)+s;n=Math.floor((n-m)/26)}return s}
+function sheet(rows){let x='<?xml version="1.0"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>';rows.forEach((r,i)=>{x+='<row r="'+(i+1)+'">';r.forEach((v,j)=>x+='<c r="'+col(j+1)+(i+1)+'" t="inlineStr"><is><t>'+xmlEsc(v)+'</t></is></c>');x+='</row>'});return x+'</sheetData></worksheet>'}
+function xmlEsc(v){return String(v??'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))}
+function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function zipFiles(files){let enc=new TextEncoder(),names=Object.keys(files),chunks=[],central=[],offset=0;names.forEach(name=>{let data=enc.encode(files[name]),n=enc.encode(name),crc=crc32(data),local=new Uint8Array(30+n.length),dv=new DataView(local.buffer);dv.setUint32(0,0x04034b50,true);dv.setUint16(4,20,true);dv.setUint32(14,crc,true);dv.setUint32(18,data.length,true);dv.setUint32(22,data.length,true);dv.setUint16(26,n.length,true);local.set(n,30);chunks.push(local,data);let cent=new Uint8Array(46+n.length),cdv=new DataView(cent.buffer);cdv.setUint32(0,0x02014b50,true);cdv.setUint16(4,20,true);cdv.setUint16(6,20,true);cdv.setUint32(16,crc,true);cdv.setUint32(20,data.length,true);cdv.setUint32(24,data.length,true);cdv.setUint16(28,n.length,true);cdv.setUint32(42,offset,true);cent.set(n,46);central.push(cent);offset+=local.length+data.length});let size=central.reduce((a,c)=>a+c.length,0),end=new Uint8Array(22),e=new DataView(end.buffer);e.setUint32(0,0x06054b50,true);e.setUint16(8,names.length,true);e.setUint16(10,names.length,true);e.setUint32(12,size,true);e.setUint32(16,offset,true);return new Blob([...chunks,...central,end])}
+function crc32(data){let c=~0;for(let i=0;i<data.length;i++){c^=data[i];for(let k=0;k<8;k++)c=(c>>>1)^(0xedb88320&-(c&1))}return~c>>>0}
+
+// ========== CONFETTI ==========
+function confetti(){
+  ['#3de6c8','#5ab4ff','#ffcc55','#ff6b6b','#b48bff','#b2eb5b'].forEach(c => {
+    for(let j=0;j<8;j++){
+      const e = document.createElement('div');
+      e.className = 'confetti-piece';
+      e.style.cssText = `left:${Math.random()*100}vw;width:${6+Math.random()*9}px;height:${8+Math.random()*12}px;background:${c};animation-delay:${Math.random()*.5}s;border-radius:${Math.random()>0.5?'50%':'3px'}`;
+      document.body.appendChild(e);
+      setTimeout(() => e.remove(), 3000);
+    }
+  });
+}
+
+// ========== INIT ==========
+// ========== OUTRO FIELDS ==========
+function toggleOutro(id){
+  const sel = document.getElementById(id);
+  const inp = document.getElementById(id+'-outro');
+  if(!inp) return;
+  inp.style.display = (sel.value === 'outro') ? 'block' : 'none';
+}
+
+// ========== SAVE RESULT AS IMAGE ==========
+function saveResultImage(){
+  const el = document.getElementById('final');
+  if(!el){ toast('Conclua o jogo primeiro'); return; }
+  // Use html2canvas via CDN (loaded lazily)
+  if(window.html2canvas){
+    _doSnap(el);
+  } else {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+    s.onload = () => _doSnap(el);
+    s.onerror = () => toast('Não foi possível carregar o módulo de imagem. Tente usar a opção Imprimir / PDF.');
+    document.head.appendChild(s);
+  }
+}
+function _doSnap(el){
+  toast('Gerando imagem...');
+  const wrapper = document.createElement('div');
+  wrapper.style.cssText = 'position:fixed;top:-9999px;left:0;width:720px;background:#07121a;padding:24px;box-sizing:border-box';
+  wrapper.innerHTML = el.innerHTML;
+  document.body.appendChild(wrapper);
+  html2canvas(wrapper, {scale:2, useCORS:true, backgroundColor:'#07121a'}).then(canvas => {
+    document.body.removeChild(wrapper);
+    const a = document.createElement('a');
+    a.href = canvas.toDataURL('image/png');
+    a.download = 'resultado_' + (S.nome||'estudante').replace(/\s+/g,'_') + '.png';
+    a.click();
+    toast('Imagem salva!');
+  }).catch(() => { document.body.removeChild(wrapper); toast('Erro ao gerar imagem. Use Imprimir / PDF.'); });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  prog();
+  energyUp();
+  calcP();
+  attachWordCounters();
+});
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
