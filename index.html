@@ -1060,7 +1060,7 @@ const QUIZ = [
 ];
 
 // ========== CONFIGURAÇÃO SHEETS ==========
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby0wsHES4Uu4WpYP1HSIIcA8-eFcx7cDSN8KQ3QKNEnJmAJeUBL9JwzKlNmTO0wo74/exec'; // Cole aqui a URL do Web App do Apps Script após publicar.
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwFp8K4PYiqw9s4LMNfDazl4t5SwLv5GHhuLlll9U3ZGkPuOKkqt-nS5dG4IoTl3oE/exec'; // Cole aqui a URL do Web App do Apps Script após publicar.
 
 // ========== ESTADO ==========
 let cur = 0, xp = 0, qok = false, qscore = 0, sel = '';
@@ -1554,7 +1554,15 @@ function buildFinal(){
     </div>
     <div class="card" style="margin-top:12px">
       <h3>Suas respostas-chave</h3>
-      <p><strong>Rotina descrita:</strong> ${esc((S.diagRotina||'').slice(0,120))}<br><strong>Atrapalha:</strong> ${esc(S.diagAtrapalha||'')}<br><strong>Gatilho:</strong> ${esc(S.gatilho)}<br><strong>Recompensa:</strong> ${esc(S.recompensa)}<br><strong>Desafio:</strong> ${esc(S.desafio==='outro'?S.desafioOutro:S.desafio)}<br><strong>Estratégia:</strong> ${esc(S.estrategia==='outro'?S.estrategiaOutro:S.estrategia)}<br><strong>Por quê importa:</strong> ${esc(S.porque)}</p>
+      <p>
+        <strong>Rotina descrita:</strong> ${esc(S.diagRotina || '(não preenchido)')}<br>
+        <strong>Atrapalha:</strong> ${esc(S.diagAtrapalha || '(não preenchido)')}<br>
+        <strong>Gatilho:</strong> ${esc(S.gatilho || '(não preenchido)')}<br>
+        <strong>Recompensa:</strong> ${esc(S.recompensa || '(não preenchido)')}<br>
+        <strong>Desafio:</strong> ${esc(S.desafio === 'outro' ? S.desafioOutro : S.desafio || '(não preenchido)')}<br>
+        <strong>Estratégia:</strong> ${esc(S.estrategia === 'outro' ? S.estrategiaOutro : S.estrategia || '(não preenchido)')}<br>
+        <strong>Por quê importa:</strong> ${esc(S.porque || '(não preenchido)')}
+    </p>
       ${S.retroPercep ? `<p><strong>Percepção do vídeo retrospectiva:</strong> ${esc(S.retroPercep)}</p>` : ''}
       ${S.retomadaJust ? `<p><strong>Retomada Aula 4 — decidiu fazer:</strong> ${esc(S.retomadaDecisao||'')}<br><strong>Justificativa:</strong> ${esc(S.retomadaJust)}</p>` : ''}
     </div>`;
