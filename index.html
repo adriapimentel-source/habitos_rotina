@@ -1889,6 +1889,15 @@ document.addEventListener('DOMContentLoaded', () => {
   energyUp();
   calcP();
   attachWordCounters();
+
+  // Fecha menu de acessibilidade ao clicar fora
+  document.addEventListener('click', e => {
+    const modal = $('am');
+    if(!modal.classList.contains('open')) return;
+    if(!modal.querySelector('.modal-panel').contains(e.target) && !e.target.closest('.accessibility-fab')){
+      closeA();
+    }
+  });
 });
 </script>
 </body>
