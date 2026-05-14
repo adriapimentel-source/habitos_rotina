@@ -336,6 +336,35 @@ hr{border:0;border-top:1px solid var(--line);margin:16px 0}
 .info p,.science p,.ok p,.warnbox p,.errorbox p,.card p,.concept-block p,.phase-card p,.honesty-box p,.video-gate p,.energy-center p{text-align:justify}
 
 @media print{.top,.accessibility-fab,.prog-wrap,.nav,.modal,.toast,.palette{display:none!important}body{background:#fff;color:#111}#s8{display:block!important}.screen{display:none!important}#s8.active,.card{background:#fff;border:1px solid #999}}
+@media print {
+  /* Força a exibição de todas as telas na hora de imprimir */
+  .screen {
+    display: block !important;
+    page-break-inside: avoid;
+    margin-bottom: 24px;
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+  }
+  
+  /* Oculta barras, botões e elementos interativos que não vão para o papel */
+  .top, .prog-wrap, .btn, .accessibility-fab, .video-gate, .nav {
+    display: none !important;
+  }
+  
+  /* Garante fundo branco e texto preto para economizar tinta e facilitar a leitura */
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    background-image: none !important;
+  }
+  .card, .info, .phase-card, .quiz-item {
+    background: #ffffff !important;
+    border: 1px solid #cccccc !important;
+    color: #000000 !important;
+    page-break-inside: avoid;
+  }
+}  
 </style>
 </head>
 <body>
@@ -1031,7 +1060,7 @@ const QUIZ = [
 ];
 
 // ========== CONFIGURAÇÃO SHEETS ==========
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyderSWa0hvtDU6kwuwzwnsuYlZUT2xjP7wla7JmSgnwEsOCAmkpFZgdMY9w3bvW5I/exec'; // Cole aqui a URL do Web App do Apps Script após publicar.
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwSQunfYQcVAY2oU9FboDXQLZZb686rfHqyG5mIpXSmDg7_bxBx7cCCkZk_bJsjMc4/exec'; // Cole aqui a URL do Web App do Apps Script após publicar.
 
 // ========== ESTADO ==========
 let cur = 0, xp = 0, qok = false, qscore = 0, sel = '';
