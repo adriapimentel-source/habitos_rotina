@@ -1060,7 +1060,7 @@ const QUIZ = [
 ];
 
 // ========== CONFIGURAÇÃO SHEETS ==========
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwSQunfYQcVAY2oU9FboDXQLZZb686rfHqyG5mIpXSmDg7_bxBx7cCCkZk_bJsjMc4/exec'; // Cole aqui a URL do Web App do Apps Script após publicar.
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby0wsHES4Uu4WpYP1HSIIcA8-eFcx7cDSN8KQ3QKNEnJmAJeUBL9JwzKlNmTO0wo74/exec'; // Cole aqui a URL do Web App do Apps Script após publicar.
 
 // ========== ESTADO ==========
 let cur = 0, xp = 0, qok = false, qscore = 0, sel = '';
@@ -1584,14 +1584,20 @@ function saveActivityToSheets(){
     toast('Configure a URL do Apps Script para salvar no Sheets.');
     return;
   }
-  S.sheetsSaved = true;
+  // NÃO seta sheetsSaved=true aqui — só depois de confirmar
+  const payload = JSON.stringify(buildSheetsPayload());
   fetch(APPS_SCRIPT_URL, {
-    method:'POST',
-    mode:'no-cors',
-    headers:{ 'Content-Type':'text/plain;charset=utf-8' },
-    body: JSON.stringify(buildSheetsPayload())
-  }).then(() => toast('Atividade enviada para o Sheets.')).catch(() => {
-    S.sheetsSaved = false;
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: payload
+  })
+  .then(() => {
+    S.sheetsSaved = true;  // ← move para cá
+    toast('Atividade enviada para o Sheets! ✅');
+  })
+  .catch(err => {
+    console.error('Sheets send error:', err);
     toast('Não foi possível enviar para o Sheets.');
   });
 }
